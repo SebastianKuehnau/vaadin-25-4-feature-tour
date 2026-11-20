@@ -1,0 +1,18 @@
+/*
+ * Loaded with @StyleSheet(layer = "tour-defaults"). Rules in a cascade layer
+ * lose to unlayered styles, whatever their specificity.
+ */
+.layer-box {
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border: 2px dashed #b45309;
+  background: #fef3c7;
+  color: #78350f;
+}
+
+/* Deliberately very specific, and still loses to ".layer-box.app-styled" in styles.css */
+#layer-demo div.layer-box.app-styled.app-styled {
+  background: #fecaca;
+  border-color: #b91c1c;
+  color: #7f1d1d;
+}

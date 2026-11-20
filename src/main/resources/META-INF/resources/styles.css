@@ -721,3 +721,29 @@
   text-align: end;
   font-variant-numeric: tabular-nums;
 }
+
+/* Unlayered app style: wins over the layered rule in styles/tour-defaults.css */
+.layer-box.app-styled {
+  background: #dcfce7;
+  border-color: #15803d;
+  color: #14532d;
+}
+
+tour-clock {
+  font: 600 2rem/1 ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.layer-demo {
+  display: grid;
+  gap: var(--vaadin-gap-m, 1rem);
+  width: 100%;
+}
+
+.ancestor-box {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px dashed var(--vaadin-border-color, rgba(0, 0, 0, 0.25));
+  border-radius: var(--vaadin-radius-m, 8px);
+}

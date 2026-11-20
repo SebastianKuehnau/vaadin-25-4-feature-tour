@@ -43,7 +43,7 @@ class JdbcDatabaseProvider implements DatabaseProvider {
             }
             return rows;
         } catch (SQLException e) {
-            // New in 25.3: the message of a ToolException is relayed to the LLM,
+            // The message of a ToolException is relayed to the LLM,
             // so it can fix its query. H2 messages describe the SQL problem only.
             throw new ToolException("Query failed: " + e.getMessage(), e);
         }

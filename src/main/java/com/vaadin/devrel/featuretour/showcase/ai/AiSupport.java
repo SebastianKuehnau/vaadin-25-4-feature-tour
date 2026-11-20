@@ -27,7 +27,8 @@ public class AiSupport {
         this.chatModel = chatModel;
         this.provider = env.getProperty("spring.ai.model.chat", "openai").toLowerCase(Locale.ROOT);
         this.apiKey = env.getProperty("spring.ai." + provider + ".api-key", "");
-        this.model = env.getProperty("spring.ai." + provider + ".chat.options.model", provider);
+        this.model = env.getProperty("spring.ai." + provider + ".chat.model",
+                env.getProperty("spring.ai." + provider + ".chat.options.model", provider));
     }
 
     /**

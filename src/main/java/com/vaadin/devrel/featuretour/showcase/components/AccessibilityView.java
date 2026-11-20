@@ -19,6 +19,7 @@ import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.UploadButton;
 import com.vaadin.flow.component.upload.UploadCapture;
+import com.vaadin.flow.component.upload.UploadDropZone;
 import com.vaadin.flow.component.upload.UploadFileList;
 import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.router.Menu;
@@ -37,6 +38,7 @@ public class AccessibilityView extends ShowcasePage {
     final UploadManager uploads = new UploadManager(this);
     final UploadButton camera = new UploadButton("Take a photo", uploads);
     final UploadFileList files = new UploadFileList(uploads);
+    final UploadDropZone dropZone = new UploadDropZone(new Span("…or drop photos here"), uploads);
     final TabSheet tabs = new TabSheet();
     final TextField email = new TextField("Email");
     final Span tabStatus = new Span();
@@ -104,19 +106,22 @@ public class AccessibilityView extends ShowcasePage {
         camera.setCapture(UploadCapture.ENVIRONMENT);
         camera.setTestId("camera");
         files.setTestId("files");
+        dropZone.setTestId("drop-zone");
+        dropZone.addClassName("drop-zone");
         uploadStatus.addClassName("showcase-status");
         uploadStatus.setTestId("upload-status");
 
         addDemo("Upload: camera capture",
                 "On phones, the button opens the camera directly: ENVIRONMENT for the back camera, USER for the front. "
                         + "On desktop it opens the normal file dialog.",
-                new VerticalLayout(camera, files, uploadStatus), """
+                new VerticalLayout(camera, dropZone, files, uploadStatus), """
                         UploadManager uploads = new UploadManager(this,
                                 UploadHandler.inMemory((metadata, data) -> save(data)));
                         uploads.setAcceptedMimeTypes("image/*");
 
                         UploadButton camera = new UploadButton("Take a photo", uploads);
                         camera.setCapture(UploadCapture.ENVIRONMENT);
+                        UploadDropZone dropZone = new UploadDropZone(new Span("…or drop photos here"), uploads);
                         UploadFileList files = new UploadFileList(uploads);
                         """);
     }

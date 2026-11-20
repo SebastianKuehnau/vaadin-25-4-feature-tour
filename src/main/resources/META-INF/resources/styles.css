@@ -775,3 +775,10 @@ tour-clock {
   padding-inline-start: 1.25rem;
   font-size: 0.875rem;
 }
+
+.drop-zone {
+  padding: 1rem 1.5rem;
+  border: 2px dashed var(--vaadin-border-color, rgba(0, 0, 0, 0.25));
+  border-radius: var(--vaadin-radius-m, 8px);
+  color: var(--vaadin-text-color-secondary);
+}

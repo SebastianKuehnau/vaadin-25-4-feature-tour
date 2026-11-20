@@ -681,3 +681,18 @@
   border: 1px dashed var(--vaadin-border-color, rgba(0, 0, 0, 0.2));
   border-radius: var(--vaadin-radius-m, 8px);
 }
+
+.download-card {
+  max-width: 22rem;
+  cursor: pointer;
+}
+
+.download-card:hover {
+  outline: 2px solid var(--aura-accent-color, #0368de);
+}
+
+.context-target {
+  padding: 1rem 1.5rem;
+  border: 1px dashed var(--vaadin-border-color, rgba(0, 0, 0, 0.25));
+  border-radius: var(--vaadin-radius-m, 8px);
+}

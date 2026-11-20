@@ -629,3 +629,19 @@
   color: var(--aura-orange, #b45309);
   font-weight: 600;
 }
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: var(--vaadin-gap-l, 1.5rem);
+  width: 100%;
+}
+
+.compare-column h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.compare-column pre {
+  margin: 0;
+}

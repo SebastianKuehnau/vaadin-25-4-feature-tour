@@ -747,3 +747,16 @@ tour-clock {
   border: 1px dashed var(--vaadin-border-color, rgba(0, 0, 0, 0.25));
   border-radius: var(--vaadin-radius-m, 8px);
 }
+
+.button-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.button-column p {
+  margin: 0;
+  color: var(--vaadin-text-color-secondary);
+  font-size: 0.875rem;
+}

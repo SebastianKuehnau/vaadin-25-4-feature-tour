@@ -1,110 +1,156 @@
-# My Application
+# Vaadin 25.4 Feature Tour
 
-A Spring Boot + Vaadin project. Build your UI in pure Java — no HTML, no JavaScript.
+*A Vaadin DevRel demo app.*
 
-> **New to Vaadin?** The 5-minute [Quickstart](https://vaadin.com/quickstart) walks you from here to your first running app, a live code change, and an AI-assisted edit with Copilot.
+A hands-on tour of [Vaadin 25.4](https://github.com/vaadin/platform/releases/tag/25.4.0-beta2): every page is a live
+demo of one release feature, with the Java code behind it and a link to the documentation. The successor of the
+[Vaadin 25.3 Feature Tour](https://github.com/SebastianKuehnau/vaadin-25-3-feature-tour).
 
----
+Built with Vaadin Flow 25.4.0-beta2, Spring Boot 4.2 and the Aura theme.
 
-## Fastest start — no plugin needed
+## What's inside
 
-From the project folder:
+| Area | Page | Feature | License |
+|---|---|---|---|
+| Security | Strict CSP | `vaadin.csp` = `off` / `warn` / `strict`, a legacy string `executeJs` next to its declared replacement, CSP warnings captured live | Free |
+| | Declared JavaScript | `@JsDefinition` + `@JsExpression`, typed `JavaScriptResult<T>` (clipboard, a record), `DomEventFilter` + `addEventDataPath()`, old vs. new | Free |
+| Flow | Media & Native Form | `Video`, `Audio`, `Source` from range-enabled `DownloadHandler`s with a live log of byte ranges, `NativeForm` login | Free |
+| | Downloads Everywhere | `Download.onClick()` on a Card, `DownloadTarget.NEW_TAB`, `Button.setDownloadHandler()`, Menu Bar and Context Menu items | Free |
+| | Hierarchical Menus | `@Menu(parent = ...)` and `MenuConfiguration.getMenuEntriesTree()` build this app's own side nav | Free |
+| | Lifecycle Events | Request and navigation start/end with handler, outcome and duration; `vaadin-request` / `vaadin-server-message` round trips in the browser | Free |
+| | Styling | `@StyleSheet(layer = "...")` losing to app styles on purpose, `@JavaScript(type = MODULE)` | Free |
+| | Small API Wins | `withNullSafeConverter`, `Component.findAncestor(predicate)`, `ExtendedClientDetails.getZoneId()`, `RouteConfiguration.getUrl()` with query parameters | Free |
+| Components | PDF Viewer | From a URL and a `DownloadHandler`, page navigation and zoom from Java, page signals, custom toolbar button | Commercial, preview |
+| | Forms: Labels Aside | `LABEL_ASIDE` on eight field types, `FormLayout.setLabelTextAlign()` | Free |
+| | Multi-Select Combo Box | Select All / Select Filtered, hidden with lazy data | Free |
+| | Text Selection | `setSelectionRange()` on the invalid part after validation, `selectAll()`, `setCursorPosition()` | Free |
+| | Button | `DisableOnClickMode.UNTIL_RESPONSE` vs. no protection vs. `setDisableOnClick(true)`, with a 2 s listener | Free |
+| | Grid | Multi-select by row click, `getColumnBySortProperty()`, context menu that knows the clicked column | Free |
+| | Now Stable | Switch and Breadcrumbs without feature flags | Free |
+| | Accessibility & More | Heading levels (Dialog, Confirm Dialog, Card), Dialog `aria-describedby`, camera capture, `findTabContaining()`, `Notification.getText()`, Slider variants | Free |
+| AI | AI Grid Paging | `GridAIController` paging through `DatabaseProvider.executeQuery(sql, QueryPage)` and `count(sql)`, `submitDisabled` | Commercial, preview |
+| Tooling | Copilot 25.4 | Guided page: Browserless tests from the recorder, Kotlin views, auto-responsive Form Layout, Component Gallery, drilldown, optimistic updates | – |
+| | Under the Hood | Hilla TypeScript in Java, leaner `vaadin-spring`, Node.js 26, Spring Boot 4.2, CDI/Quarkus versioning, breaking changes | – |
 
-```bash
-./mvnw spring-boot:run        # Windows: mvnw.cmd spring-boot:run
-```
+## Running the app
 
-Then open **http://localhost:8080**.
-
-The first start takes ~30 seconds while Maven downloads dependencies. This project has no views yet, so the browser shows a *Could not navigate to ''* (route not found) page. That means the app is running: add your first view, a class annotated with `@Route("")`, to replace it.
-
-> **Port 8080 already in use?** Stop the other process, or set `server.port=8081` in `src/main/resources/application.properties` and open that port instead.
->
-> **To stop the app:** press `Ctrl+C` in the terminal (or the red Stop button if you launched from your IDE).
-
-## Optional upgrade — instant hotswap
-
-Running with `spring-boot:run` works, but Java code changes need a server restart. For **live reload** — edit Java, see it in the browser without restarting — install the **Vaadin plugin** and start the app through it:
-
-- **IntelliJ IDEA:** install *Vaadin* from the JetBrains Marketplace → **Debug using Hotswap Agent** (dropdown next to Run). *Just installed it? Let IntelliJ finish indexing, or restart it, if the menu item isn't there yet.*
-- **VS Code:** install the *Vaadin* extension → **Vaadin: Debug using Hotswap Agent** from the command palette.
-- **Eclipse:** install the *Vaadin* plugin → right-click the project → **Run As → Vaadin Application**.
-
-This is what makes the edit-and-see-it loop feel instant — and it's required for the AI edits in [Vaadin Copilot](https://vaadin.com/docs/latest/tools/copilot).
-
-> **Run the app one way at a time.** `./mvnw spring-boot:run`, your IDE, and the Dev Loop all serve on port 8080, so stop one before starting another. If an AI coding agent edits the code for you, use the Dev Loop instead of the IDE — see [Agentic Development](#agentic-development).
-
----
-
-## Ask your AI assistant about Vaadin (optional)
-
-If you use Claude Code, Cursor, or another AI coding assistant, connect it to the **Vaadin MCP server** so it answers against real Vaadin docs and the exact API of your installed version — instead of guessing from outdated training data.
-
-The one-time setup is described in [Vaadin MCP server](https://vaadin.com/docs/latest/building-apps/mcp).
-
----
-
-## Agentic Development
-
-If you develop with an AI coding agent, such as Claude Code or Codex, enable the Vaadin Dev Loop. It lets the agent make
-its changes live in the running application with a single command, and tells it whether they took effect, without
-restarting the application or checking screenshots. To enable it, run:
+Requirements: Java 21 or later. Maven and Node.js are handled by the wrapper and the Vaadin plugin (it downloads
+Node.js 26 into `~/.vaadin` if needed). 25.4 is a pre-release: the `vaadin-prereleases` repository is configured in
+`pom.xml`.
 
 ```bash
-./mvnw vaadin:install-dev-cli
+./mvnw
 ```
 
-This installs the Dev Loop CLI into `.vaadin/`, and skills that teach your agent how to use it into `.agents/skills/` and
-`.claude/skills/`. Commit these files with the rest of the project, and run the command again after upgrading Vaadin.
+Then open http://localhost:8888. Set `PORT` to use a different port.
 
-Once it is enabled, start the application through the Dev Loop, and leave the page open in the browser:
+The app runs with `vaadin.csp=warn`. Switch the mode with `VAADIN_CSP`:
 
 ```bash
-.vaadin/vaadin-dev start      # Windows: .vaadin\vaadin-dev.cmd start
+VAADIN_CSP=strict ./mvnw
 ```
 
-The Dev Loop owns the application process and brings its own Hotswap Agent, so do not also start the application with
-`./mvnw spring-boot:run` or an IDE run or debug configuration: the second launcher fights the Dev Loop for port 8080. Use
-`.vaadin/vaadin-dev status` to see whether the application is running, and `.vaadin/vaadin-dev restart` instead of
-restarting it from the IDE.
+Commercial features (PDF Viewer, AI Grid) ask for a Vaadin license in the browser the first time you use them. A
+[free trial](https://vaadin.com/trial) works. The PDF Viewer and the AI features are previews and are enabled in
+`src/main/resources/vaadin-featureflags.properties`.
 
-The Dev Loop is a preview feature. To learn more, including how to give your agent access to the Vaadin documentation,
-see the [Dev Loop tutorial](https://vaadin.com/docs/v25/building-apps/agentic-development/dev-loop-tutorial).
+### AI demos
 
----
-
-## Build for production
+The AI Grid page talks to an LLM through Spring AI. OpenAI is the default:
 
 ```bash
-./mvnw package
-java -jar target/*.jar
+export OPENAI_API_KEY=sk-...
+./mvnw
 ```
 
-To build a Docker image, run:
+To use Anthropic instead:
 
 ```bash
-docker build -t my-application:latest .
+export AI_PROVIDER=anthropic
+export ANTHROPIC_API_KEY=sk-ant-...
+./mvnw
 ```
 
-If you use commercial components, pass the license key as a build secret:
+The models are set in `application.properties` (`gpt-5.4-mini`, `claude-sonnet-5-5`). Without a key, the AI page
+shows a hint instead of the live demo. The grid runs the SQL written by the LLM as a read-only H2 user. The LLM sees
+the schema, never the rows. Ask for "all orders" and scroll: the paging log shows each page the grid fetches.
+
+## Tests
 
 ```bash
-docker build --secret id=proKey,src=$HOME/.vaadin/proKey -t my-application:latest .
+./mvnw test
 ```
 
-To run the image, run:
+Browserless tests using the new 25.4 testing APIs:
 
-```bash
-docker run -p 8080:8080 -m 2g my-application:latest
+- `withTestId()` / `testId()` for every lookup (the demo components have test IDs)
+- `reload()` in the Hierarchical Menus and Lifecycle Events tests
+- `roundTrip()` to run the Lifecycle dashboard's `UI.access()` refresh
+- `UploadButton`, `UploadDropZone` and `UploadFileList` testers with successful, failed, aborted and rejected uploads
+- Dedicated tests for Text Selection (it checks the declared `setSelectionRange` call), Button `UNTIL_RESPONSE` and
+  Labels Aside
+- The `DatabaseProvider` paging defaults behind the AI Grid, against H2 without an LLM
+- A smoke test that opens every page
+
+## Project structure
+
+```
+src/main/java/com/vaadin/devrel/featuretour
+├── base/ui              MainLayout (side nav from the menu tree + breadcrumbs), ShowcasePage, AreaPage,
+│                        ShowcaseInfo, Tier badges
+└── showcase
+    ├── home             Overview page
+    ├── security         Strict CSP, declared JavaScript
+    ├── flow             Media & native form, downloads, menus, lifecycle events, styling, small API wins
+    ├── components       PDF Viewer, labels aside, multi-select combo box, text selection, button, grid, ...
+    ├── ai               AI Grid paging, LLM and database setup
+    └── tooling          Copilot 25.4, under the hood
+src/main/resources
+├── META-INF/resources
+│   ├── styles.css             App styles
+│   ├── vaadin-blue-inter.css  Aura theme configuration (Vaadin blue accent, Inter)
+│   ├── styles/                The cascade layer demo style sheet
+│   ├── js/                    The runtime ES module demo
+│   └── pdf/                   Sample PDF (a tagged 4-page cheat sheet)
+└── media/                     Generated test video and audio for the media demo
 ```
 
-The application is then available at http://localhost:8080. The `-m` option sets the memory limit of the container. The
-application uses up to 75% of it for the Java heap, which holds the UI state of all users, so adjust the limit to fit
-your application.
+Every page declares its area with `@Menu(parent = ...)` and its card text and badges with `@ShowcaseInfo`. The side
+nav, the Home page and the area pages are all built from `MenuConfiguration.getMenuEntriesTree()`.
 
-## Learn more
+## Known gaps in beta2
 
-- [Vaadin Quickstart](https://vaadin.com/quickstart) — the 5-minute getting-started path
-- [Components](https://vaadin.com/docs/latest/components) — 50+ UI components, all callable from Java
-- [Vaadin Copilot](https://vaadin.com/docs/latest/tools/copilot) — visual + AI editing in the browser
-- [Full documentation](https://vaadin.com/docs)
+What didn't work as announced, or couldn't be verified while building this tour:
+
+- **`OpenInNewTab.onClick()`** from the release notes is not public API in beta2 (only an internal
+  `OpenInNewTabAction`). The Downloads page uses `Download.onClick(component, handler, DownloadTarget.NEW_TAB)`, which
+  does the same, and says so on the page.
+- **Strict CSP is not production-only.** `vaadin.csp=strict` makes string JavaScript throw `CspViolationException`
+  in development mode too; only the nonce-based `Content-Security-Policy` header is limited to production. Vaadin's
+  own event filters for double/single click listeners and keyboard shortcuts still use `eval` and throw in strict
+  mode (documented in `CspMode`).
+- **`NavigationEndedEvent` has no duration.** The Lifecycle page pairs it with `NavigationStartedEvent` per UI.
+  `RequestStartedEvent` has no session, and the first request of a page load starts before the session exists.
+- **`RouteConfiguration.getUrl()` with query parameters** only exists as `getUrl(target, RouteParameters,
+  QueryParameters)`; pass `RouteParameters.empty()`.
+- **Browserless**: `reload()` reports the new navigation with the trigger `PROGRAMMATIC`, not `REFRESH`.
+  `ButtonTester.click()` runs the before-response callbacks itself, so an `UNTIL_RESPONSE` button is enabled again when
+  `click()` returns (the test checks the disabled state from a click listener). There is no tester API for text
+  selection; the test inspects the pending `JsCall` instead.
+- **Not verified in the environment this tour was built in:**
+  - PDF Viewer rendering and a production build (`./mvnw package`): the available license key does not cover
+    `vaadin-pdf-viewer` 25.4.0-beta1, so the viewer showed the license notice and the production build stopped at the
+    license check. Consequently, the production CSP header was not checked either.
+  - AI Grid paging with a live LLM (no API key). The paging defaults are covered by `PagingDatabaseProviderTest`.
+  - The Copilot features (guided page only).
+  - Docs links: `vaadin.com` was not reachable. Links that appear in the beta2 release notes are used as is; the others
+    (`flow/routing/menu`, `components/pdf-viewer`, `components/grid`, `components/dialog`, `components/switch`,
+    `flow/ai-support/ai-powered-grid`, `flow/advanced/session-lock-and-rpc-listeners`,
+    `flow/binding-data/components-binder-validation`) follow the 25.3 tour's paths under `docs/next` and may move.
+
+## Links
+
+- [Release notes 25.4.0-beta2](https://github.com/vaadin/platform/releases/tag/25.4.0-beta2)
+- [Release notes 25.4.0-beta1](https://github.com/vaadin/platform/releases/tag/25.4.0-beta1)
+- [Vaadin documentation (next)](https://vaadin.com/docs/next)
+- [Vaadin 25.3 Feature Tour](https://github.com/SebastianKuehnau/vaadin-25-3-feature-tour)

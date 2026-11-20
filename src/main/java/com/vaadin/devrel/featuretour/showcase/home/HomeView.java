@@ -1,8 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.home;
 
-import com.vaadin.devrel.featuretour.base.ui.Tier;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.card.Card;
+import com.vaadin.devrel.featuretour.base.ui.FeatureCards;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Div;
@@ -12,16 +10,16 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.menu.MenuConfiguration;
+import com.vaadin.flow.server.menu.MenuEntry;
 
 @Route("")
 @PageTitle("Home")
+@Menu(title = "Overview", order = 0, icon = "vaadin:home")
 public class HomeView extends VerticalLayout {
-
-    record Feature(String title, String summary, Class<? extends Component> view, Tier... tiers) {
-    }
 
     public HomeView() {
         addClassName("home-view");
@@ -40,27 +38,13 @@ public class HomeView extends VerticalLayout {
         hero.addClassName("home-hero");
         add(hero);
 
-        // Feature sections are added page by page
-    }
-
-    private void section(String heading, Feature... features) {
-        var cards = new Div();
-        cards.addClassName("card-grid");
-        for (Feature feature : features) {
-            var card = new Card();
-            card.setTitle(new RouterLink(feature.title(), feature.view()));
-            card.setSubtitle(feature.summary());
-            var badges = new Div();
-            badges.addClassName("showcase-badges");
-            for (Tier tier : feature.tiers()) {
-                badges.add(tier.badge());
+        // One section per area, built from the same menu tree as the side nav
+        for (MenuEntry area : MenuConfiguration.getMenuEntriesTree()) {
+            if (!area.children().isEmpty()) {
+                var section = new Div(new H2(area.title()), new FeatureCards(area.children()));
+                section.addClassName("home-section");
+                add(section);
             }
-            card.add(badges);
-            card.addClassName("feature-card");
-            cards.add(card);
         }
-        var section = new Div(new H2(heading), cards);
-        section.addClassName("home-section");
-        add(section);
     }
 }

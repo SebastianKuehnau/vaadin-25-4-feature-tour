@@ -27,7 +27,9 @@ public abstract class ShowcasePage extends VerticalLayout {
 
         var badges = new FlexLayout();
         badges.addClassName("showcase-badges");
-        for (Tier tier : tiers) {
+        // Without explicit tiers, the badges come from @ShowcaseInfo on the page class
+        var info = getClass().getAnnotation(ShowcaseInfo.class);
+        for (Tier tier : tiers.length == 0 && info != null ? info.tiers() : tiers) {
             badges.add(tier.badge());
         }
 
@@ -65,8 +67,19 @@ public abstract class ShowcasePage extends VerticalLayout {
      * Adds a note box, e.g. for setup hints.
      */
     protected Div addNote(String text) {
+        return addNote(text, false);
+    }
+
+    /**
+     * Adds a note box. A warning note is used for features that are not yet
+     * usable in this beta.
+     */
+    protected Div addNote(String text, boolean warning) {
         var note = new Div(new Paragraph(text));
         note.addClassName("showcase-note");
+        if (warning) {
+            note.addClassName("warning");
+        }
         add(note);
         return note;
     }

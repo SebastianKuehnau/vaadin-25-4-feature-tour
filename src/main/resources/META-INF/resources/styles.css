@@ -760,3 +760,18 @@ tour-clock {
   color: var(--vaadin-text-color-secondary);
   font-size: 0.875rem;
 }
+
+.guide-cards {
+  width: 100%;
+  margin-top: var(--vaadin-gap-l, 1.5rem);
+}
+
+.guide-card p {
+  margin: 0;
+}
+
+.guide-card ol {
+  margin: 0.5rem 0 0;
+  padding-inline-start: 1.25rem;
+  font-size: 0.875rem;
+}

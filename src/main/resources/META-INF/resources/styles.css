@@ -645,3 +645,39 @@
 .compare-column pre {
   margin: 0;
 }
+
+.native-login {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--vaadin-gap-m, 1rem);
+}
+
+.native-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.native-field input,
+.native-login button {
+  font: inherit;
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--vaadin-radius-m, 6px);
+  border: 1px solid var(--vaadin-border-color, rgba(0, 0, 0, 0.25));
+}
+
+.native-login button {
+  cursor: pointer;
+  background: var(--aura-accent-color, #0368de);
+  color: white;
+  border: none;
+}
+
+.login-result {
+  width: 100%;
+  height: 4.5rem;
+  border: 1px dashed var(--vaadin-border-color, rgba(0, 0, 0, 0.2));
+  border-radius: var(--vaadin-radius-m, 8px);
+}

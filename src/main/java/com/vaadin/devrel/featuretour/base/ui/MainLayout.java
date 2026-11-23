@@ -20,6 +20,7 @@ import com.vaadin.flow.component.orderedlayout.ScrollerVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
@@ -29,11 +30,15 @@ import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
 
 import java.util.Locale;
+import java.util.Map;
 
 @Layout
 public final class MainLayout extends AppLayout implements AfterNavigationObserver {
 
     static final String RELEASE_NOTES = "https://github.com/vaadin/platform/releases/tag/25.4.0-beta2";
+
+    private static final Map<String, String> FLAGS = Map.of("en", "🇬🇧", "de", "🇩🇪", "fr", "🇫🇷", "es", "🇪🇸",
+            "it", "🇮🇹", "pt", "🇵🇹");
 
     MainLayout() {
         setPrimarySection(Section.DRAWER);
@@ -41,7 +46,8 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
 
         var breadcrumbs = new Breadcrumbs();
         breadcrumbs.addClassName("app-breadcrumbs");
-        addToNavbar(new DrawerToggle(), breadcrumbs);
+        breadcrumbs.getStyle().set("flex-grow", "1");
+        addToNavbar(new DrawerToggle(), breadcrumbs, createLanguageSwitcher());
     }
 
     private Component createApplicationHeader() {
@@ -95,16 +101,22 @@ public final class MainLayout extends AppLayout implements AfterNavigationObserv
     private Component createApplicationFooter() {
         var source = new Anchor(RELEASE_NOTES, Messages.get("link.releaseNotes"));
         source.setTarget(AnchorTarget.BLANK);
-        var footer = new Div(new Span(Messages.get("app.footer")), source, createLanguageSwitcher());
+        var footer = new Div(new Span(Messages.get("app.footer")), source);
         footer.addClassName("app-footer");
         return footer;
     }
 
     private Component createLanguageSwitcher() {
         var language = new Select<Locale>();
-        language.setLabel(Messages.get("language.label"));
+        language.getElement().setAttribute("aria-label", Messages.get("language.label"));
         language.setItems(AppI18NProvider.LOCALES);
-        language.setItemLabelGenerator(l -> l.getDisplayLanguage(l));
+        // The flag stands in for the language name, which is kept as tooltip
+        language.setRenderer(new ComponentRenderer<>(l -> {
+            var flag = new Span(FLAGS.getOrDefault(l.getLanguage(), "🏳️"));
+            flag.getElement().setAttribute("title", l.getDisplayLanguage(l));
+            return flag;
+        }));
+        language.setWidth("5em");
         language.setValue(UI.getCurrent().getLocale());
         language.addClassName("app-language");
         language.addValueChangeListener(e -> {

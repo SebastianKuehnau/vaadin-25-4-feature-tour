@@ -30,6 +30,11 @@ public final class FeatureCards extends Div {
                 card.add(badges);
             }
             card.addClassName("feature-card");
+            card.getElement().addEventListener("click", event -> {
+                if (entry.menuClass() != null) {
+                    getUI().ifPresent(ui -> ui.navigate(entry.menuClass()));
+                }
+            });
             add(card);
         }
     }

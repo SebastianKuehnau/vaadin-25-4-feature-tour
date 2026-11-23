@@ -1,8 +1,10 @@
 package com.vaadin.devrel.featuretour.showcase.components;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
@@ -36,22 +38,20 @@ public class PdfViewerView extends ShowcasePage {
 
     public PdfViewerView() {
         super("PDF Viewer",
-                "Shows PDF documents inside the application, with page navigation, zoom and a toolbar. Tagged PDFs "
-                        + "expose their structure to screen readers.",
+                Messages.get("components.pdf.lead"),
                 "https://vaadin.com/docs/next/components/pdf-viewer");
 
-        addNote("Preview: enabled with com.vaadin.experimental.pdfViewerComponent=true in "
-                + "src/main/resources/vaadin-featureflags.properties. A Vaadin license is needed (a trial works).");
+        addNote(Messages.get("components.pdf.note"));
         addUrlDemo();
         addHandlerDemo();
     }
 
     private void addUrlDemo() {
-        fromUrl.setHeaderTitle("Loaded from a URL");
+        fromUrl.setHeaderTitle(Messages.get("components.pdf.url.title"));
         fromUrl.setHeight("480px");
         fromUrl.setTestId("pdf-url");
-        addDemo("From a URL",
-                "The simplest case: a static file served by the app, or any URL the browser can fetch.",
+        addDemo(Messages.get("components.pdf.url.heading"),
+                Messages.get("components.pdf.url.desc"),
                 fromUrl, """
                         PdfViewer viewer = new PdfViewer("pdf/cheat-sheet.pdf");
                         viewer.setHeight("480px");
@@ -59,7 +59,7 @@ public class PdfViewerView extends ShowcasePage {
     }
 
     private void addHandlerDemo() {
-        fromHandler.setHeaderTitle("Served by a DownloadHandler");
+        fromHandler.setHeaderTitle(Messages.get("components.pdf.handler.title"));
         fromHandler.setFileName("vaadin-25-4-cheat-sheet.pdf");
         fromHandler.setDownloadButtonVisible(true);
         fromHandler.setHeight("520px");
@@ -67,38 +67,40 @@ public class PdfViewerView extends ShowcasePage {
 
         // A custom action in the viewer's own toolbar
         var bookmark = new Button(VaadinIcon.BOOKMARK_O.create(),
-                e -> Notification.show("Bookmarked page " + fromHandler.getPage()));
+                e -> Notification.show(Messages.get("components.pdf.bookmarked", fromHandler.getPage())));
         bookmark.addThemeVariants(ButtonVariant.TERTIARY);
-        bookmark.setAriaLabel("Bookmark this page");
+        bookmark.setAriaLabel(Messages.get("components.pdf.bookmark.aria"));
         bookmark.setTestId("pdf-bookmark");
         fromHandler.getToolbarActions().add(bookmark);
 
         // Page navigation from the server, with the state as signals
-        var previous = new Button("Previous", VaadinIcon.ARROW_LEFT.create(),
+        var previous = new Button(Messages.get("components.pdf.previous"), VaadinIcon.ARROW_LEFT.create(),
                 e -> fromHandler.scrollToPage(Math.max(1, fromHandler.getPage() - 1)));
-        var next = new Button("Next", VaadinIcon.ARROW_RIGHT.create(),
+        var next = new Button(Messages.get("components.pdf.next"), VaadinIcon.ARROW_RIGHT.create(),
                 e -> fromHandler.scrollToPage(Math.min(fromHandler.getPageCount(), fromHandler.getPage() + 1)));
         next.setTestId("pdf-next");
         var page = new Span();
         page.setTestId("pdf-page");
         page.addClassName("showcase-status");
-        page.bindText(() -> "Page " + fromHandler.pageSignal().get() + " of " + fromHandler.pageCountSignal().get());
+        var ui = UI.getCurrent();
+        page.bindText(() -> ui.getTranslation("components.pdf.page", fromHandler.pageSignal().get(),
+                fromHandler.pageCountSignal().get()));
 
         var zoom = new Select<ZoomOption>();
-        zoom.setLabel("Zoom");
-        zoom.setItems(List.of(new ZoomOption("Fit page", Zoom.PAGE_FIT), new ZoomOption("Page width", Zoom.PAGE_WIDTH),
+        zoom.setLabel(Messages.get("components.pdf.zoom.label"));
+        zoom.setItems(List.of(new ZoomOption(Messages.get("components.pdf.zoom.fit"), Zoom.PAGE_FIT),
+                new ZoomOption(Messages.get("components.pdf.zoom.width"), Zoom.PAGE_WIDTH),
                 new ZoomOption("50 %", Zoom.of(0.5)), new ZoomOption("100 %", Zoom.of(1)),
                 new ZoomOption("150 %", Zoom.of(1.5))));
         zoom.setItemLabelGenerator(ZoomOption::label);
         zoom.addValueChangeListener(e -> fromHandler.setZoom(e.getValue().zoom()));
-        zoom.setPlaceholder("Default");
+        zoom.setPlaceholder(Messages.get("components.pdf.zoom.default"));
         zoom.setWidth("10rem");
 
         var controls = new FlexLayout(previous, next, page, zoom);
         controls.addClassName("showcase-row");
-        addDemo("From a DownloadHandler, controlled from Java",
-                "Page and page count are signals, so the label follows the viewer. The bookmark icon at the end of the "
-                        + "viewer's toolbar is a regular Button added with getToolbarActions().",
+        addDemo(Messages.get("components.pdf.handler.heading"),
+                Messages.get("components.pdf.handler.desc"),
                 new VerticalLayout(controls, fromHandler), """
                         PdfViewer viewer = new PdfViewer(DownloadHandler.forClassResource(..., "cheat-sheet.pdf"));
                         viewer.setFileName("vaadin-25-4-cheat-sheet.pdf");

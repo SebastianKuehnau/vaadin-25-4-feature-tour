@@ -1,8 +1,10 @@
 package com.vaadin.devrel.featuretour.showcase.flow;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
@@ -35,14 +37,14 @@ public class DownloadsView extends ShowcasePage {
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     final Card reportCard = new Card();
-    final Span status = new Span("Nothing downloaded yet.");
+    final Span status = new Span();
 
     public DownloadsView() {
         super("Downloads Everywhere",
-                "Start a download, or open content in a new tab, from a click on any component. No Anchor around a "
-                        + "button anymore: the component keeps its look, keyboard handling and click listeners.",
+                Messages.get("flow.downloads.lead"),
                 "https://vaadin.com/docs/next/flow/advanced/downloads");
 
+        status.setText(Messages.get("flow.downloads.status.none"));
         status.addClassName("showcase-status");
         status.setTestId("download-status");
         add(status);
@@ -55,24 +57,26 @@ public class DownloadsView extends ShowcasePage {
 
     /** A CSV file, created when the browser asks for it. */
     InputStreamDownloadHandler csv(String name) {
+        // The callback runs on a download request thread, so keep the UI to translate with
+        var ui = UI.getCurrent();
         return DownloadHandler.fromInputStream(event -> {
             byte[] content = ("release,feature,tier\n25.4,Strict CSP,Free\n25.4,PDF Viewer,Commercial\n"
                     + "25.4,Downloads Everywhere,Free\n").getBytes(StandardCharsets.UTF_8);
             return new DownloadResponse(new ByteArrayInputStream(content), name, "text/csv", content.length);
-        }).whenComplete(ok -> status.setText(LocalTime.now().format(TIME) + (ok ? " ✅ Served " : " ❌ Failed ") + name));
+        }).whenComplete(ok -> status.setText(ui.getTranslation(
+                ok ? "flow.downloads.status.served" : "flow.downloads.status.failed", LocalTime.now().format(TIME), name)));
     }
 
     private void addCardDemo() {
-        reportCard.setTitle("Release report");
-        reportCard.setSubtitle("features-25-4.csv · click anywhere on the card");
+        reportCard.setTitle(Messages.get("flow.downloads.card.title"));
+        reportCard.setSubtitle(Messages.get("flow.downloads.card.subtitle"));
         reportCard.setHeaderPrefix(VaadinIcon.FILE_TABLE.create());
         reportCard.addClassName("download-card");
         reportCard.setTestId("report-card");
         Download.onClick(reportCard, csv("features-25-4.csv"));
 
-        addDemo("Any component: a Card",
-                "The download starts in the browser's own click handler, so there is no extra round trip. "
-                        + "The content is created lazily, and whenComplete reports success or failure on the server.",
+        addDemo(Messages.get("flow.downloads.card.heading"),
+                Messages.get("flow.downloads.card.desc"),
                 reportCard, """
                         Download.onClick(reportCard, DownloadHandler.fromInputStream(event ->
                                         new DownloadResponse(stream, "features-25-4.csv", "text/csv", length))
@@ -81,32 +85,30 @@ public class DownloadsView extends ShowcasePage {
     }
 
     private void addNewTabDemo() {
-        var poster = new Button("Open poster in a new tab", VaadinIcon.EXTERNAL_LINK.create());
+        var poster = new Button(Messages.get("flow.downloads.newtab.poster"), VaadinIcon.EXTERNAL_LINK.create());
         Download.onClick(poster, DownloadHandler.forClassResource(DownloadsView.class, "/media/poster.jpg"),
                 DownloadTarget.NEW_TAB);
-        var docs = new Button("Open the 25.4 docs", VaadinIcon.BOOK.create());
+        var docs = new Button(Messages.get("flow.downloads.newtab.docs"), VaadinIcon.BOOK.create());
         Download.onClick(docs, "https://vaadin.com/docs/next", DownloadTarget.NEW_TAB);
 
         var row = new FlexLayout(poster, docs);
         row.addClassName("showcase-row");
-        addDemo("Open in a new tab",
-                "DownloadTarget.NEW_TAB opens handler content or a URL in a new tab. The tab opens in the click "
-                        + "handler, so popup blockers let it through, unlike Page.open() after a round trip.",
+        addDemo(Messages.get("flow.downloads.newtab.heading"),
+                Messages.get("flow.downloads.newtab.desc"),
                 row, """
                         Download.onClick(poster, DownloadHandler.forClassResource(..., "/media/poster.jpg"),
                                 DownloadTarget.NEW_TAB);
                         Download.onClick(docs, "https://vaadin.com/docs/next", DownloadTarget.NEW_TAB);
                         """);
-        addNote("Beta 2: the release notes mention OpenInNewTab.onClick(), but there is no such public class yet. "
-                + "Download.onClick(component, handler, DownloadTarget.NEW_TAB) does the same today.", true);
+        addNote(Messages.get("flow.downloads.newtab.note"), true);
     }
 
     private void addButtonDemo() {
-        var button = new Button("Export CSV", VaadinIcon.DOWNLOAD.create());
+        var button = new Button(Messages.get("flow.downloads.button.label"), VaadinIcon.DOWNLOAD.create());
         button.setDownloadHandler(csv("button-export.csv"));
         button.setTestId("button-download");
         addDemo("Button.setDownloadHandler()",
-                "The shortcut for the most common case.",
+                Messages.get("flow.downloads.button.desc"),
                 button, """
                         Button export = new Button("Export CSV");
                         export.setDownloadHandler(csvHandler);
@@ -115,21 +117,22 @@ public class DownloadsView extends ShowcasePage {
 
     private void addMenuDemo() {
         var menuBar = new MenuBar();
-        var export = menuBar.addItem("Export").getSubMenu();
-        export.addItem("As CSV").setDownloadHandler(csv("menu-bar.csv"));
-        export.addItem("Poster image").setDownloadHandler(
+        var export = menuBar.addItem(Messages.get("flow.downloads.menu.export")).getSubMenu();
+                export.addItem(Messages.get("flow.downloads.menu.csv")).setDownloadHandler(csv("menu-bar.csv"));
+        export.addItem(Messages.get("flow.downloads.menu.poster")).setDownloadHandler(
                 DownloadHandler.forClassResource(DownloadsView.class, "/media/poster.jpg"));
 
-        var target = new Div(new Span("Right-click here"));
+        var target = new Div(new Span(Messages.get("flow.downloads.menu.target")));
         target.addClassName("context-target");
         var contextMenu = new ContextMenu(target);
-        contextMenu.addItem("Download report").setDownloadHandler(csv("context-menu.csv"));
-        contextMenu.addItem("Do something else", e -> status.setText("Regular menu items still work."));
+        contextMenu.addItem(Messages.get("flow.downloads.menu.report")).setDownloadHandler(csv("context-menu.csv"));
+        contextMenu.addItem(Messages.get("flow.downloads.menu.other"),
+                e -> status.setText(Messages.get("flow.downloads.menu.regular")));
 
         var row = new FlexLayout(menuBar, target);
         row.addClassName("showcase-row");
-        addDemo("Context Menu and Menu Bar items",
-                "Menu items can start downloads too, from a menu bar or a context menu.",
+        addDemo(Messages.get("flow.downloads.menu.heading"),
+                Messages.get("flow.downloads.menu.desc"),
                 row, """
                         MenuBar menuBar = new MenuBar();
                         SubMenu export = menuBar.addItem("Export").getSubMenu();

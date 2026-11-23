@@ -16,7 +16,16 @@ import java.util.ResourceBundle;
 @Component
 public class AppI18NProvider implements I18NProvider {
 
-    static final String BUNDLE = "messages";
+    /**
+     * The shell's bundle plus one bundle per area, so areas can be translated
+     * independently: {@code messages*.properties} and
+     * {@code i18n/<area>*.properties}.
+     */
+    public static final List<String> BUNDLES = List.of("messages", "i18n.security", "i18n.flow", "i18n.components",
+            "i18n.ai", "i18n.tooling");
+
+    private static final ResourceBundle.Control NO_FALLBACK = ResourceBundle.Control
+            .getNoFallbackControl(ResourceBundle.Control.FORMAT_DEFAULT);
 
     public static final List<Locale> LOCALES = List.of(Locale.ENGLISH, Locale.GERMAN, Locale.FRENCH,
             Locale.of("es"), Locale.ITALIAN, Locale.of("pt"));
@@ -28,12 +37,16 @@ public class AppI18NProvider implements I18NProvider {
 
     @Override
     public String getTranslation(String key, Locale locale, Object... params) {
-        String value;
-        try {
-            value = ResourceBundle.getBundle(BUNDLE, locale == null ? Locale.ENGLISH : locale).getString(key);
-        } catch (MissingResourceException e) {
-            return key;
+        Locale target = locale == null ? Locale.ENGLISH : locale;
+        for (String name : BUNDLES) {
+            try {
+                // No fallback to the JVM's default locale: unknown languages get English
+                String value = ResourceBundle.getBundle(name, target, NO_FALLBACK).getString(key);
+                return params.length == 0 ? value : MessageFormat.format(value, params);
+            } catch (MissingResourceException e) {
+                // try the next bundle
+            }
         }
-        return params.length == 0 ? value : MessageFormat.format(value, params);
+        return key;
     }
 }

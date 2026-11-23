@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.ai;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
 
@@ -15,10 +16,9 @@ abstract class AiPage extends ShowcasePage {
         super(title, lead, docsUrl, tiers);
         this.ai = ai;
         if (ai.isConfigured()) {
-            addNote("Powered by " + ai.modelName() + " through Spring AI. Your prompts are sent to " + ai.providerName() + ".");
+            addNote(Messages.get("ai.page.powered", ai.modelName(), ai.providerName()));
         } else {
-            addNote("No LLM configured. Set OPENAI_API_KEY (or AI_PROVIDER=anthropic and ANTHROPIC_API_KEY) "
-                    + "and restart the app to try this demo live.").addClassName("warning");
+            addNote(Messages.get("ai.page.noLlm")).addClassName("warning");
         }
     }
 }

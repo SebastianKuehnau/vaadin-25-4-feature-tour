@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.components;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
@@ -21,19 +22,17 @@ public class NowStableView extends ShowcasePage {
 
     public NowStableView() {
         super("Now Stable",
-                "Switch and Breadcrumbs, introduced in 25.3, are production ready in 25.4 and no longer need a feature "
-                        + "flag. This app uses no flag for them: see vaadin-featureflags.properties.",
+                Messages.get("components.nowstable.lead"),
                 "https://vaadin.com/docs/next/components/switch");
 
-        var notifications = new Switch("Email notifications", true);
+        var notifications = new Switch(Messages.get("components.nowstable.switch"), true);
         notifications.setTestId("stable-switch");
         var manual = new Breadcrumbs(Breadcrumbs.Mode.MANUAL);
-        manual.add(new BreadcrumbsItem("Home", ""), new BreadcrumbsItem("Components", "components"),
-                new BreadcrumbsItem("Now Stable", "now-stable"));
+        manual.add(new BreadcrumbsItem(Messages.get("components.nowstable.crumb.home"), ""), new BreadcrumbsItem(Messages.get("components.nowstable.crumb.components"), "components"),
+                new BreadcrumbsItem(Messages.get("components.nowstable.crumb.nowstable"), "now-stable"));
 
-        addDemo("No flag needed",
-                "A Switch, and Breadcrumbs in manual mode. The trail in the app header is the router mode, built "
-                        + "from the route hierarchy.",
+        addDemo(Messages.get("components.nowstable.heading"),
+                Messages.get("components.nowstable.desc"),
                 new VerticalLayout(notifications, manual), """
                         // 25.3: com.vaadin.experimental.switchComponent=true, ...breadcrumbsComponent=true
                         // 25.4: just use them
@@ -42,7 +41,7 @@ public class NowStableView extends ShowcasePage {
                         """);
 
         var tour = new Anchor("https://github.com/SebastianKuehnau/vaadin-25-3-feature-tour",
-                "The 25.3 feature tour has full pages for both →");
+                Messages.get("components.nowstable.link"));
         tour.setTarget(AnchorTarget.BLANK);
         add(tour);
     }

@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.security;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
@@ -53,18 +54,17 @@ public class DeclaredJsView extends ShowcasePage {
 
     static final KeyFilters FILTERS = JsSnippets.of(KeyFilters.class);
 
-    final TextField snippet = new TextField("Text to copy");
-    final Button copy = new Button("Copy", VaadinIcon.COPY.create());
-    final Button viewport = new Button("Read viewport");
+    final TextField snippet = new TextField(Messages.get("security.declaredjs.snippet.label"));
+    final Button copy = new Button(Messages.get("security.declaredjs.copy"), VaadinIcon.COPY.create());
+    final Button viewport = new Button(Messages.get("security.declaredjs.viewport"));
     final Span copyStatus = new Span();
-    final TextField command = new TextField("Command");
+    final TextField command = new TextField(Messages.get("security.declaredjs.command.label"));
     final Div commandLog = new Div();
     int submitted;
 
     public DeclaredJsView() {
         super("Declared JavaScript",
-                "Declare JavaScript in a Java interface with @JsDefinition and @JsExpression. It is collected into the "
-                        + "bundle at build time, so the browser never compiles a string, and calls return typed values.",
+                Messages.get("security.declaredjs.lead"),
                 "https://vaadin.com/docs/next/flow/security/protections/content-security-policy");
 
         addClipboardDemo();
@@ -83,18 +83,17 @@ public class DeclaredJsView extends ShowcasePage {
         copy.addClickListener(e -> copy.getElement().executeJs(ClipboardJs.class)
                 .copy(snippet.getValue())
                 .then(copied -> copyStatus.setText(copied
-                        ? "✅ Copied \"" + snippet.getValue() + "\" (JavaScriptResult<Boolean> = true)"
-                        : "⚠️ The browser denied clipboard access (JavaScriptResult<Boolean> = false)")));
+                        ? Messages.get("security.declaredjs.copy.ok", snippet.getValue())
+                        : Messages.get("security.declaredjs.copy.denied"))));
         viewport.addClickListener(e -> viewport.getElement().executeJs(ClipboardJs.class)
                 .viewport()
-                .then(v -> copyStatus.setText("📐 " + v.width() + " × " + v.height() + " px, language " + v.language()
-                        + " (JavaScriptResult<Viewport>, a Java record)")));
+                .then(v -> copyStatus.setText(Messages.get("security.declaredjs.viewport.result",
+                        String.valueOf(v.width()), String.valueOf(v.height()), v.language()))));
 
         var row = new FlexLayout(snippet, copy, viewport);
         row.addClassName("showcase-row");
-        addDemo("Typed results: copy to clipboard",
-                "The promise from the Clipboard API resolves to a Boolean on the server. A JavaScript object can just as "
-                        + "well become a Java record: the value is converted with Jackson.",
+        addDemo(Messages.get("security.declaredjs.demo1.heading"),
+                Messages.get("security.declaredjs.demo1.desc"),
                 new VerticalLayout(row, copyStatus), """
                         @JsDefinition
                         public interface ClipboardJs extends Serializable {
@@ -112,12 +111,12 @@ public class DeclaredJsView extends ShowcasePage {
     }
 
     private void addKeyFilterDemo() {
-        command.setPlaceholder("Type and press Enter");
+        command.setPlaceholder(Messages.get("security.declaredjs.command.placeholder"));
         command.setWidth("22rem");
         command.setTestId("command");
         commandLog.setTestId("command-log");
         commandLog.addClassName("csp-warnings");
-        commandLog.add(new Span("Only Enter reaches the server. Other keys are filtered in the browser."));
+        commandLog.add(new Span(Messages.get("security.declaredjs.command.hint")));
 
         command.getElement().addEventListener("keydown", event -> {
                     String value = event.getEventData().get("element.value").asString();
@@ -131,9 +130,8 @@ public class DeclaredJsView extends ShowcasePage {
                 .setFilterExpression(FILTERS.isKey("Enter"))
                 .addEventDataPath("element.value");
 
-        addDemo("Event data paths and declared filters",
-                "The filter is declared once and created with an argument per listener. The value of the field travels "
-                        + "with the event as a property path, which the browser reads without compiling anything.",
+        addDemo(Messages.get("security.declaredjs.demo2.heading"),
+                Messages.get("security.declaredjs.demo2.desc"),
                 new VerticalLayout(command, commandLog), """
                         @JsDefinition
                         public interface KeyFilters extends Serializable {
@@ -153,7 +151,7 @@ public class DeclaredJsView extends ShowcasePage {
 
     private void addComparison() {
         var compare = new Div(
-                column("Before 25.4 (deprecated, needs 'unsafe-eval')", """
+                column(Messages.get("security.declaredjs.compare.before"), """
                         element.executeJs(
                             "return navigator.clipboard.writeText($0)", text)
                           .then(Boolean.class, ok -> ...);
@@ -162,7 +160,7 @@ public class DeclaredJsView extends ShowcasePage {
                           .setFilter("event.key === 'Enter'")
                           .addEventData("element.value");
                         """),
-                column("25.4 (CSP-safe)", """
+                column(Messages.get("security.declaredjs.compare.after"), """
                         element.executeJs(ClipboardJs.class)
                           .copy(text)
                           .then(ok -> ...);
@@ -172,9 +170,8 @@ public class DeclaredJsView extends ShowcasePage {
                           .addEventDataPath("element.value");
                         """));
         compare.addClassName("compare-grid");
-        addDemo("Old vs. new",
-                "The string variants still work, but setFilter(String) and addEventData(String) are deprecated since "
-                        + "25.4, and vaadin.csp=warn reports every call site that still uses them.",
+        addDemo(Messages.get("security.declaredjs.compare.heading"),
+                Messages.get("security.declaredjs.compare.desc"),
                 compare, "");
     }
 

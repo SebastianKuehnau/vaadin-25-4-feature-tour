@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.flow;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
@@ -28,8 +29,7 @@ public class StylingView extends ShowcasePage {
 
     public StylingView() {
         super("Styling",
-                "Load a style sheet into a CSS cascade layer, so your own styles always win over it, and load an ES "
-                        + "module at runtime without bundling it.",
+                Messages.get("flow.styling.lead"),
                 "https://vaadin.com/docs/next/styling/stylesheets");
 
         addLayerDemo();
@@ -37,10 +37,9 @@ public class StylingView extends ShowcasePage {
     }
 
     private void addLayerDemo() {
-        var layered = new Div(new Span("Styled only by the layer: amber, as the layer says."));
+        var layered = new Div(new Span(Messages.get("flow.styling.layer.styled")));
         layered.addClassName("layer-box");
-        var conflicting = new Div(new Span("The layer says red with selector #layer-demo div.layer-box.app-styled.app-styled. "
-                + "The app says green with .layer-box.app-styled. Green wins."));
+        var conflicting = new Div(new Span(Messages.get("flow.styling.layer.conflict")));
         conflicting.addClassNames("layer-box", "app-styled");
         conflicting.setTestId("layer-conflict");
 
@@ -48,9 +47,8 @@ public class StylingView extends ShowcasePage {
         demo.setId("layer-demo");
         demo.addClassName("layer-demo");
 
-        addDemo("Cascade layers: defaults you can always override",
-                "Rules in a layer have lower priority than rules outside of any layer, regardless of specificity. "
-                        + "Ideal for a theme or an add-on's default look: app styles override it without a specificity war.",
+        addDemo(Messages.get("flow.styling.layer.heading"),
+                Messages.get("flow.styling.layer.desc"),
                 demo, """
                         @StyleSheet(value = "styles/tour-defaults.css", layer = "tour-defaults")
                         public class StylingView extends ShowcasePage { ... }
@@ -68,10 +66,8 @@ public class StylingView extends ShowcasePage {
     private void addModuleDemo() {
         var clock = new TourClock();
         clock.setTestId("tour-clock");
-        addDemo("Runtime ES modules",
-                "The clock is a custom element from js/tour-clock.js, a plain ES module served as a static resource. "
-                        + "type = MODULE loads it as <script type=\"module\"> at runtime, so it does not go through Vite. "
-                        + "Use @JsModule for files that should be bundled.",
+        addDemo(Messages.get("flow.styling.module.heading"),
+                Messages.get("flow.styling.module.desc"),
                 clock, """
                         @JavaScript(value = "js/tour-clock.js", type = JavaScript.Type.MODULE)
                         public class StylingView extends ShowcasePage { ... }

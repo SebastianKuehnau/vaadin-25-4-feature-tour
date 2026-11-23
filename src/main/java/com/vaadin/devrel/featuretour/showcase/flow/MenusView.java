@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.flow;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
@@ -27,8 +28,7 @@ public class MenusView extends ShowcasePage {
 
     public MenusView() {
         super("Hierarchical Menus",
-                "MenuConfiguration.getMenuEntriesTree() returns the menu as a tree instead of a flat list. "
-                        + "The side nav of this app is built from it: every page names its area with @Menu(parent = ...).",
+                Messages.get("flow.menus.lead"),
                 "https://vaadin.com/docs/next/flow/routing/menu");
 
         addTreeDemo();
@@ -42,12 +42,11 @@ public class MenusView extends ShowcasePage {
 
         int flat = MenuConfiguration.getMenuEntries().size();
         int roots = MenuConfiguration.getMenuEntriesTree().size();
-        var summary = new Span(flat + " menu entries in getMenuEntries(), " + roots + " roots in getMenuEntriesTree().");
+        var summary = new Span(Messages.get("flow.menus.tree.summary", flat, roots));
         summary.addClassName("showcase-status");
 
-        addDemo("The menu tree of this app",
-                "This is what getMenuEntriesTree() returns right now. The drawer on the left renders the same tree "
-                        + "recursively into SideNavItems, so a new page shows up in the right group by itself.",
+        addDemo(Messages.get("flow.menus.tree.heading"),
+                Messages.get("flow.menus.tree.desc"),
                 new VerticalLayout(summary, tree), """
                         // MainLayout: one SideNavItem per entry, children nested
                         for (MenuEntry entry : MenuConfiguration.getMenuEntriesTree()) {
@@ -80,16 +79,13 @@ public class MenusView extends ShowcasePage {
         var security = MenuConfiguration.getMenuEntriesTree().stream()
                 .filter(e -> e.menuClass() == SecurityArea.class)
                 .findFirst()
-                .map(e -> e.children().size() + " pages are nested under " + e.title() + ".")
-                .orElse("Security area not found.");
+                .map(e -> Messages.get("flow.menus.parent.count", e.children().size(), e.title()))
+                .orElse(Messages.get("flow.menus.parent.missing"));
         var status = new Span(security);
         status.addClassName("showcase-status");
 
-        addDemo("Nesting with @Menu(parent)",
-                "The pages here have flat URLs such as /strict-csp, so the route hierarchy would put them all at the "
-                        + "top level. @Menu(parent = ...) moves them under their area in the menu only: URLs, navigation "
-                        + "and the flat getMenuEntries() list stay as they are. Without it, entries nest by @RouteParent "
-                        + "or by URL prefix.",
+        addDemo(Messages.get("flow.menus.parent.heading"),
+                Messages.get("flow.menus.parent.desc"),
                 status, """
                         @Route("security")
                         @Menu(title = "Security", order = 1, icon = "vaadin:shield")

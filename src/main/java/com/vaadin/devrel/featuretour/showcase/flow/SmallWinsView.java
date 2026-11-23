@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.flow;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
@@ -45,16 +46,17 @@ public class SmallWinsView extends ShowcasePage {
     }
 
     final Person person = new Person();
-    final TextField birthDate = new TextField("Birth date (yyyy-mm-dd)");
+    final TextField birthDate = new TextField();
     final Span beanState = new Span();
     final Span ancestor = new Span();
     final Span url = new Span();
 
     public SmallWinsView() {
         super("Small API Wins",
-                "Small additions that remove boilerplate you have probably written yourself.",
+                Messages.get("flow.smallwins.lead"),
                 "https://vaadin.com/docs/next/flow/binding-data/components-binder-validation");
 
+        birthDate.setLabel(Messages.get("flow.smallwins.birthDate.label"));
         addConverterDemo();
         addAncestorDemo();
         addTimeZoneDemo();
@@ -64,7 +66,7 @@ public class SmallWinsView extends ShowcasePage {
     private void addConverterDemo() {
         var binder = new Binder<>(Person.class);
         binder.forField(birthDate)
-                .withNullSafeConverter(LocalDate::parse, LocalDate::toString, e -> "Use the format 2026-11-20", "")
+                .withNullSafeConverter(LocalDate::parse, LocalDate::toString, e -> Messages.get("flow.smallwins.birthDate.error"), "")
                 .bind(Person::getBirthDate, Person::setBirthDate);
         binder.setBean(person);
         birthDate.setTestId("birth-date");
@@ -73,9 +75,8 @@ public class SmallWinsView extends ShowcasePage {
         showBean();
         binder.addValueChangeListener(e -> showBean());
 
-        addDemo("Null-safe converters in Binder",
-                "Type a date, then clear the field. The empty field becomes null in the bean instead of a parse error, "
-                        + "and a null bean value empties the field. The functions never see null or the empty string.",
+        addDemo(Messages.get("flow.smallwins.converter.heading"),
+                Messages.get("flow.smallwins.converter.desc"),
                 new VerticalLayout(birthDate, beanState), """
                         binder.forField(birthDate)
                                 .withNullSafeConverter(LocalDate::parse, LocalDate::toString,
@@ -92,25 +93,25 @@ public class SmallWinsView extends ShowcasePage {
     }
 
     private void addAncestorDemo() {
-        var button = new Button("Which section am I in?");
+        var button = new Button(Messages.get("flow.smallwins.ancestor.button"));
         button.setTestId("find-ancestor");
         ancestor.setTestId("ancestor");
         ancestor.addClassName("showcase-status");
         button.addClickListener(e -> ancestor.setText(button
                 .findAncestor(c -> c.getElement().hasAttribute("data-area"))
-                .map(c -> "Nearest ancestor with data-area: " + c.getElement().getAttribute("data-area")
-                        + " (a " + c.getClass().getSimpleName() + ")")
-                .orElse("No such ancestor")));
+                .map(c -> Messages.get("flow.smallwins.ancestor.found", c.getElement().getAttribute("data-area"),
+                        c.getClass().getSimpleName()))
+                .orElse(Messages.get("flow.smallwins.ancestor.none"))));
 
         var inner = new Div(new FlexLayout(button));
         inner.getElement().setAttribute("data-area", "inner panel");
         inner.addClassName("ancestor-box");
-        var outer = new Div(new Span("Outer panel"), inner);
+        var outer = new Div(new Span(Messages.get("flow.smallwins.ancestor.outer")), inner);
         outer.getElement().setAttribute("data-area", "outer panel");
         outer.addClassName("ancestor-box");
 
         addDemo("Component.findAncestor(predicate)",
-                "findAncestor(Class) finds by type. The new overload takes any predicate and walks up the parents.",
+                Messages.get("flow.smallwins.ancestor.desc"),
                 new VerticalLayout(outer, ancestor), """
                         Optional<Component> panel = button.findAncestor(
                                 c -> c.getElement().hasAttribute("data-area"));
@@ -120,12 +121,12 @@ public class SmallWinsView extends ShowcasePage {
     private void addTimeZoneDemo() {
         ExtendedClientDetails details = UI.getCurrentOrThrow().getPage().getExtendedClientDetails();
         var format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
-        var zone = new Span("Browser zone: " + details.getZoneId() + " · browser time: "
-                + details.getBrowserDateTime().format(format) + " · server zone: " + ZoneId.systemDefault());
+        var zone = new Span(Messages.get("flow.smallwins.tz.text", String.valueOf(details.getZoneId()),
+                details.getBrowserDateTime().format(format), ZoneId.systemDefault().toString()));
         zone.addClassName("showcase-status");
         zone.setTestId("time-zone");
-        addDemo("The browser's time zone as a ZoneId",
-                "ExtendedClientDetails now gives you a ZoneId and the browser's local date-time, ready for java.time.",
+        addDemo(Messages.get("flow.smallwins.tz.heading"),
+                Messages.get("flow.smallwins.tz.desc"),
                 zone, """
                         ExtendedClientDetails details = UI.getCurrent().getPage().getExtendedClientDetails();
                         ZoneId zone = details.getZoneId();
@@ -138,11 +139,11 @@ public class SmallWinsView extends ShowcasePage {
                 QueryParameters.of("step", "42"));
         url.setText(link);
         url.setTestId("route-url");
-        var anchor = new Anchor(link, "Open it");
+        var anchor = new Anchor(link, Messages.get("flow.smallwins.url.anchor"));
         var row = new FlexLayout(new Span("getUrl(...) = "), url, anchor);
         row.addClassName("showcase-row");
         addDemo("RouteConfiguration.getUrl() with query parameters",
-                "Build a link to a route including its query string, without concatenating strings yourself.",
+                Messages.get("flow.smallwins.url.desc"),
                 row, """
                         String url = RouteConfiguration.forSessionScope().getUrl(LifecycleView.class,
                                 RouteParameters.empty(), QueryParameters.of("step", "42"));

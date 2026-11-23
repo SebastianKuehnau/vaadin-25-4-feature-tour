@@ -34,10 +34,9 @@ Built with Vaadin Flow 25.4.0-beta2, Spring Boot 4.2 and the Aura theme.
 
 ## Languages
 
-The app shell, Home page, area pages, menu and page titles are available in English (default), German, French,
+All labels, texts and notes of the app are available in English (default), German, French,
 Spanish, Italian and Portuguese. Pick the language in the drawer footer; the choice is kept in a cookie, and the
-browser language is used until then. Translations live in `src/main/resources/messages_*.properties`. The demo
-pages themselves stay in English.
+browser language is used until then. Translations live in `src/main/resources/messages_*.properties` and `src/main/resources/i18n/<area>_*.properties`. Java code snippets and API names stay untouched.
 
 ## Running the app
 

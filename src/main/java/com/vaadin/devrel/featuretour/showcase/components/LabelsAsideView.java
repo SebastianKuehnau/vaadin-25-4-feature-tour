@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.components;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
@@ -29,6 +30,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import java.util.List;
+import java.util.Locale;
 
 @Route("labels-aside")
 @PageTitle("Forms: Labels Aside")
@@ -36,22 +38,21 @@ import java.util.List;
 @ShowcaseInfo(summary = "LABEL_ASIDE on fields, and label text alignment in Form Layout.", tiers = Tier.FREE)
 public class LabelsAsideView extends ShowcasePage {
 
-    final TextField name = new TextField("Name");
-    final ComboBox<String> country = new ComboBox<>("Country");
-    final DatePicker start = new DatePicker("Start date");
-    final TimePicker time = new TimePicker("Daily stand-up");
+    final TextField name = new TextField(Messages.get("components.labels.name"));
+    final ComboBox<String> country = new ComboBox<>(Messages.get("components.labels.country"));
+    final DatePicker start = new DatePicker(Messages.get("components.labels.start"));
+    final TimePicker time = new TimePicker(Messages.get("components.labels.time"));
     final Select<String> role = new Select<>();
-    final CheckboxGroup<String> topics = new CheckboxGroup<>("Topics");
-    final RadioButtonGroup<String> level = new RadioButtonGroup<>("Level");
-    final IntegerSlider experience = new IntegerSlider("Years of Vaadin", 0, 25);
-    final Switch aside = new Switch("Labels aside", true);
+    final CheckboxGroup<String> topics = new CheckboxGroup<>(Messages.get("components.labels.topics"));
+    final RadioButtonGroup<String> level = new RadioButtonGroup<>(Messages.get("components.labels.level"));
+    final IntegerSlider experience = new IntegerSlider(Messages.get("components.labels.experience"), 0, 25);
+    final Switch aside = new Switch(Messages.get("components.labels.aside"), true);
     final FormLayout form = new FormLayout();
-    final RadioButtonGroup<LabelTextAlign> align = new RadioButtonGroup<>("Label text alignment");
+    final RadioButtonGroup<LabelTextAlign> align = new RadioButtonGroup<>(Messages.get("components.labels.align"));
 
     public LabelsAsideView() {
         super("Forms: Labels Aside",
-                "The LABEL_ASIDE theme variant puts a field's label next to the input instead of above it, on its own, "
-                        + "without a Form Layout. Form Layout gets a label text alignment setting for its labels aside mode.",
+                Messages.get("components.labels.lead"),
                 "https://vaadin.com/docs/next/components/form-layout");
 
         addFieldsDemo();
@@ -60,10 +61,10 @@ public class LabelsAsideView extends ShowcasePage {
 
     private void addFieldsDemo() {
         country.setItems("Finland", "Germany", "Spain", "United States");
-        role.setLabel("Role");
-        role.setItems("Developer", "Architect", "DevRel");
+        role.setLabel(Messages.get("components.labels.role"));
+        role.setItems(Messages.get("components.labels.role.developer"), Messages.get("components.labels.role.architect"), Messages.get("components.labels.role.devrel"));
         topics.setItems("Flow", "Hilla", "Copilot");
-        level.setItems("Beginner", "Advanced");
+        level.setItems(Messages.get("components.labels.level.beginner"), Messages.get("components.labels.level.advanced"));
         experience.setValue(7);
         aside.setTestId("labels-aside-switch");
         name.setTestId("aside-name");
@@ -74,9 +75,8 @@ public class LabelsAsideView extends ShowcasePage {
         var fields = new VerticalLayout(name, country, start, time, role, topics, level, experience);
         fields.setPadding(false);
         fields.addClassName("aside-fields");
-        addDemo("One variant for every field",
-                "Text fields, combo boxes, pickers, select, checkbox and radio groups and slider all support it. "
-                        + "Toggle the switch to compare with labels on top.",
+        addDemo(Messages.get("components.labels.fields.heading"),
+                Messages.get("components.labels.fields.desc"),
                 new VerticalLayout(aside, fields), """
                         name.addThemeVariants(TextFieldVariant.LABEL_ASIDE);
                         country.addThemeVariants(ComboBoxVariant.LABEL_ASIDE);
@@ -115,21 +115,20 @@ public class LabelsAsideView extends ShowcasePage {
         form.setAutoResponsive(true);
         form.setLabelsAside(true);
         form.setLabelWidth("10rem");
-        form.addFormItem(new TextField(), "First name");
-        form.addFormItem(new TextField(), "Last name");
-        form.addFormItem(new EmailField(), "Email address");
+        form.addFormItem(new TextField(), Messages.get("components.labels.form.first"));
+        form.addFormItem(new TextField(), Messages.get("components.labels.form.last"));
+        form.addFormItem(new EmailField(), Messages.get("components.labels.form.email"));
         form.setLabelTextAlign(LabelTextAlign.END);
         form.setTestId("aside-form");
 
         align.setItems(List.of(LabelTextAlign.START, LabelTextAlign.CENTER, LabelTextAlign.END));
-        align.setItemLabelGenerator(a -> a.name().charAt(0) + a.name().substring(1).toLowerCase());
+        align.setItemLabelGenerator(a -> Messages.get("components.labels.align." + a.name().toLowerCase(Locale.ROOT)));
         align.setValue(LabelTextAlign.END);
         align.addValueChangeListener(e -> form.setLabelTextAlign(e.getValue()));
         align.setTestId("label-align");
 
-        addDemo("Label text alignment in Form Layout",
-                "When a Form Layout shows its labels aside, the labels can now be aligned to the start, center or end. "
-                        + "End alignment keeps short labels close to their fields.",
+        addDemo(Messages.get("components.labels.form.heading"),
+                Messages.get("components.labels.form.desc"),
                 new VerticalLayout(align, form), """
                         form.setAutoResponsive(true);
                         form.setLabelsAside(true);

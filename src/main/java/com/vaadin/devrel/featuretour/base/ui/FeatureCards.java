@@ -21,7 +21,7 @@ public final class FeatureCards extends Div {
             card.setTitle(new RouterLink(Messages.title(entry.title()), entry.menuClass()));
             var info = entry.menuClass() == null ? null : entry.menuClass().getAnnotation(ShowcaseInfo.class);
             if (info != null) {
-                card.setSubtitle(info.summary());
+                card.setSubtitle(Messages.summary(entry.menuClass(), info.summary()));
                 var badges = new Div();
                 badges.addClassName("showcase-badges");
                 for (Tier tier : info.tiers()) {

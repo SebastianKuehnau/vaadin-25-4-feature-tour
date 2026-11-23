@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.components;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
@@ -37,14 +38,13 @@ public class GridView extends ShowcasePage {
             new Feature("AI Grid Paging", "AI", "Commercial", 8));
 
     final Grid<Feature> selectGrid = new Grid<>(Feature.class, false);
-    final Span selected = new Span("0 selected");
+    final Span selected = new Span(Messages.get("components.grid.selected", 0));
     final Grid<Feature> sortGrid = new Grid<>(Feature.class, false);
-    final Span lastAction = new Span("Right-click a cell.");
+    final Span lastAction = new Span(Messages.get("components.grid.lastAction.initial"));
 
     public GridView() {
         super("Grid",
-                "Three small improvements: selecting rows by clicking them in multi-select mode, looking up a column by "
-                        + "its sort property, and context menus that know the clicked column.",
+                Messages.get("components.grid.lead"),
                 "https://vaadin.com/docs/next/components/grid");
 
         addRowClickDemo();
@@ -52,19 +52,19 @@ public class GridView extends ShowcasePage {
     }
 
     private void addRowClickDemo() {
-        selectGrid.addColumn(Feature::name).setHeader("Feature");
-        selectGrid.addColumn(Feature::area).setHeader("Area");
+        selectGrid.addColumn(Feature::name).setHeader(Messages.get("components.grid.col.feature"));
+        selectGrid.addColumn(Feature::area).setHeader(Messages.get("components.grid.col.area"));
         selectGrid.setItems(FEATURES);
         selectGrid.setAllRowsVisible(true);
         var model = (GridMultiSelectionModel<Feature>) selectGrid.setSelectionMode(Grid.SelectionMode.MULTI);
         model.setSelectOnItemClick(true);
-        selectGrid.addSelectionListener(e -> selected.setText(e.getAllSelectedItems().size() + " selected"));
+        selectGrid.addSelectionListener(e -> selected.setText(Messages.get("components.grid.selected", e.getAllSelectedItems().size())));
         selectGrid.setTestId("select-grid");
         selected.addClassName("showcase-status");
         selected.setTestId("selected");
 
-        addDemo("Multi-select with a click on the row",
-                "Click anywhere on a row to toggle it, not only on the checkbox.",
+        addDemo(Messages.get("components.grid.rowclick.heading"),
+                Messages.get("components.grid.rowclick.desc"),
                 new VerticalLayout(selected, selectGrid), """
                         var model = (GridMultiSelectionModel<Feature>) grid.setSelectionMode(Grid.SelectionMode.MULTI);
                         model.setSelectOnItemClick(true);
@@ -72,22 +72,22 @@ public class GridView extends ShowcasePage {
     }
 
     private void addSortPropertyDemo() {
-        sortGrid.addColumn(Feature::name).setHeader("Feature").setSortProperty("name").setKey("name");
-        sortGrid.addColumn(Feature::area).setHeader("Area").setSortProperty("area").setKey("area");
-        sortGrid.addColumn(Feature::tier).setHeader("Tier").setSortProperty("tier").setKey("tier");
+        sortGrid.addColumn(Feature::name).setHeader(Messages.get("components.grid.col.feature")).setSortProperty("name").setKey("name");
+        sortGrid.addColumn(Feature::area).setHeader(Messages.get("components.grid.col.area")).setSortProperty("area").setKey("area");
+        sortGrid.addColumn(Feature::tier).setHeader(Messages.get("components.grid.col.tier")).setSortProperty("tier").setKey("tier");
         sortGrid.setItems(FEATURES);
         sortGrid.setAllRowsVisible(true);
         sortGrid.setTestId("sort-grid");
 
         var sortBy = new Select<String>();
-        sortBy.setLabel("Sort by property (e.g. from a ?sort= URL parameter)");
+        sortBy.setLabel(Messages.get("components.grid.sortBy.label"));
         sortBy.setItems("name", "area", "tier");
         sortBy.setWidth("22rem");
         sortBy.setTestId("sort-by");
         sortBy.addValueChangeListener(e -> {
             Grid.Column<Feature> column = sortGrid.getColumnBySortProperty(e.getValue());
             sortGrid.sort(GridSortOrder.asc(column).build());
-            lastAction.setText("getColumnBySortProperty(\"" + e.getValue() + "\") → column \"" + column.getHeaderText() + "\"");
+            lastAction.setText(Messages.get("components.grid.lastAction.sort", e.getValue(), column.getHeaderText()));
         });
 
         GridContextMenu<Feature> menu = sortGrid.addContextMenu();
@@ -97,20 +97,19 @@ public class GridView extends ShowcasePage {
                 return false;
             }
             String header = context.column().getHeaderText();
-            menu.addItem("Filter by " + header + " of " + context.item().name(),
-                    e -> lastAction.setText("Would filter by " + header));
-            menu.addItem("Hide column " + header, e -> {
+            menu.addItem(Messages.get("components.grid.menu.filter", header, context.item().name()),
+                    e -> lastAction.setText(Messages.get("components.grid.menu.filtering", header)));
+            menu.addItem(Messages.get("components.grid.menu.hide", header), e -> {
                 context.column().setVisible(false);
-                Notification.show("Column " + header + " hidden");
+                Notification.show(Messages.get("components.grid.menu.hidden", header));
             });
             return true;
         });
         lastAction.addClassName("showcase-status");
         lastAction.setTestId("last-action");
 
-        addDemo("Sort property lookup and column-aware context menu",
-                "Pick a sort property to sort through the column found for it. Right-click a cell: the menu is built for "
-                        + "the clicked column, from DynamicContentContext.",
+        addDemo(Messages.get("components.grid.sort.heading"),
+                Messages.get("components.grid.sort.desc"),
                 new VerticalLayout(sortBy, sortGrid, lastAction), """
                         Grid.Column<Feature> column = grid.getColumnBySortProperty("tier");
                         grid.sort(GridSortOrder.asc(column).build());

@@ -14,9 +14,12 @@ class I18nTest {
 
     @Test
     void every_language_has_every_key() {
-        var english = ResourceBundle.getBundle("messages", Locale.ENGLISH).keySet();
-        for (Locale locale : provider.getProvidedLocales()) {
-            assertThat(ResourceBundle.getBundle("messages", locale).keySet()).containsAll(english);
+        for (String bundle : AppI18NProvider.BUNDLES) {
+            var english = ResourceBundle.getBundle(bundle, Locale.ENGLISH).keySet();
+            for (Locale locale : provider.getProvidedLocales()) {
+                assertThat(ResourceBundle.getBundle(bundle, locale).keySet()).as(bundle + " " + locale)
+                        .containsAll(english);
+            }
         }
     }
 

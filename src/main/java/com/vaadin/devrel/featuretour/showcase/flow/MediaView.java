@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.flow;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
@@ -52,8 +53,7 @@ public class MediaView extends ShowcasePage {
 
     public MediaView() {
         super("Media & Native Form",
-                "New HTML components for the browser's own media players and forms. Media is served from a "
-                        + "DownloadHandler that answers HTTP range requests, so players can seek.",
+                Messages.get("flow.media.lead"),
                 "https://vaadin.com/docs/next/components/html-elements");
 
         addVideoDemo();
@@ -64,7 +64,7 @@ public class MediaView extends ShowcasePage {
     private void addVideoDemo() {
         rangeLog.addClassName("csp-warnings");
         rangeLog.setTestId("range-log");
-        rangeLog.add(new Span("Requests from the player appear here."));
+        rangeLog.add(new Span(Messages.get("flow.media.rangeLog.empty")));
 
         video.addSource(new RangeLoggingHandler(media("feature-tour.webm"), this::logRange), "video/webm");
         video.addSource(new RangeLoggingHandler(media("feature-tour.mp4"), this::logRange), "video/mp4");
@@ -74,12 +74,11 @@ public class MediaView extends ShowcasePage {
         video.setWidth("480px");
         video.setTestId("video");
 
-        var jump = new Button("Jump to 0:08", e -> video.getElement().executeJs(MediaJs.class).seek(8));
+        var jump = new Button(Messages.get("flow.media.seek"), e -> video.getElement().executeJs(MediaJs.class).seek(8));
         jump.setTestId("seek");
 
-        addDemo("Video with seeking",
-                "Two sources, WebM and MP4, both served from the classpath. Drag the timeline or jump ahead: the player "
-                        + "asks for a byte range and gets 206 Partial Content instead of the whole file.",
+        addDemo(Messages.get("flow.media.video.heading"),
+                Messages.get("flow.media.video.desc"),
                 new VerticalLayout(video, new FlexLayout(jump), rangeLog), """
                         Video video = new Video();
                         video.addSource(DownloadHandler.forClassResource(MediaView.class, "/media/feature-tour.webm")
@@ -105,7 +104,8 @@ public class MediaView extends ShowcasePage {
             if (rangeLog.getChildren().findFirst().filter(Span.class::isInstance).isPresent()) {
                 rangeLog.removeAll();
             }
-            var line = new Div(new Span(LocalTime.now().format(TIME)), new Span(range));
+            var line = new Div(new Span(LocalTime.now().format(TIME)),
+                    new Span(range == null ? Messages.get("flow.media.rangeLog.whole") : range));
             line.addClassName("csp-warning");
             rangeLog.addComponentAsFirst(line);
             while (rangeLog.getComponentCount() > 6) {
@@ -118,8 +118,8 @@ public class MediaView extends ShowcasePage {
         audio.add(new Source(media("sweep.ogg"), "audio/ogg"), new Source(media("sweep.mp3"), "audio/mpeg"));
         audio.setControlsVisible(true);
         audio.setTestId("audio");
-        addDemo("Audio",
-                "The same API for audio: a rising tone, with an Ogg and an MP3 source to pick from.",
+        addDemo(Messages.get("flow.media.audio.heading"),
+                Messages.get("flow.media.audio.desc"),
                 audio, """
                         Audio audio = new Audio(
                                 new Source(handler("sweep.ogg"), "audio/ogg"),
@@ -140,10 +140,11 @@ public class MediaView extends ShowcasePage {
         password.setId("native-password");
         // Keep the password out of the Vaadin session
         password.setValueChangeMode(null);
-        var submit = new NativeButton("Log in");
+        var submit = new NativeButton(Messages.get("flow.media.form.login"));
         submit.setType(NativeButton.Type.SUBMIT);
 
-        form.add(field("Username", username), field("Password", password), submit);
+        form.add(field(Messages.get("flow.media.form.username"), username),
+                field(Messages.get("flow.media.form.password"), password), submit);
         form.setAction("/native-login");
         form.setMethod(NativeForm.Method.POST);
         form.setTarget(AnchorTargetValue.forString("login-result"));
@@ -154,10 +155,8 @@ public class MediaView extends ShowcasePage {
         result.setName("login-result");
         result.addClassName("login-result");
 
-        addDemo("A native login form",
-                "The browser submits a native <form> by itself, so password managers recognize it and offer to save "
-                        + "and fill the credentials. Here the response goes into a frame, so this page stays open. "
-                        + "With Spring Security, post to its login processing URL instead.",
+        addDemo(Messages.get("flow.media.form.heading"),
+                Messages.get("flow.media.form.desc"),
                 new VerticalLayout(form, result), """
                         Input username = new Input();
                         username.setName("username");

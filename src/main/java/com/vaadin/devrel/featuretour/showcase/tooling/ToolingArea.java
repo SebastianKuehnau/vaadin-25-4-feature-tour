@@ -11,6 +11,6 @@ import com.vaadin.flow.router.Route;
 public class ToolingArea extends AreaPage {
 
     public ToolingArea() {
-        super("Tooling", "What's new in Copilot, and the changes under the hood that don't need a demo.");
+        super("tooling");
     }
 }

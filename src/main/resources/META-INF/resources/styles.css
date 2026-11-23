@@ -210,6 +210,7 @@
 
 .feature-card:hover {
   outline: 2px solid var(--aura-accent-color);
+  cursor: pointer;
 }
 
 /* ---------- Switch ---------- */

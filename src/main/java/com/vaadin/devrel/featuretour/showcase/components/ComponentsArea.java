@@ -11,6 +11,6 @@ import com.vaadin.flow.router.Route;
 public class ComponentsArea extends AreaPage {
 
     public ComponentsArea() {
-        super("Components", "The PDF Viewer preview, labels aside, select all, text selection and more improvements to existing components.");
+        super("components");
     }
 }

@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.flow;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.StatTile;
@@ -40,46 +41,48 @@ public class LifecycleView extends ShowcasePage implements BeforeLeaveObserver {
     public interface RoundTripJs extends Serializable {
         @JsExpression("""
                 const out = this;
+                const texts = { stats: $0, last: $1 };
+                const fmt = (t, ...values) => values.reduce((s, v, i) => s.replace('{' + i + '}', v), t);
                 for (const client of Object.values(window.Vaadin?.Flow?.clients ?? {})) {
                   if (!client.events) continue;
                   client.__tourOut = out;
+                  client.__tourTexts = texts;
                   if (client.__tourHooked) continue;
                   client.__tourHooked = true;
                   const stats = { requests: 0, total: 0, messages: 0, last: '' };
-                  const show = () => client.__tourOut.textContent = 'Browser: ' + stats.requests + ' requests, avg round trip '
-                      + (stats.requests ? (stats.total / stats.requests).toFixed(1) : '0') + ' ms, last ' + stats.last
-                      + ' · ' + stats.messages + ' server messages (replies and pushes)';
+                  const show = () => client.__tourOut.textContent = fmt(client.__tourTexts.stats, stats.requests,
+                      stats.requests ? (stats.total / stats.requests).toFixed(1) : '0', stats.last, stats.messages);
                   client.events.addEventListener('vaadin-request', ({ detail: request }) => {
                     let sentAt;
                     request.addEventListener('sent', () => sentAt = performance.now());
                     request.addEventListener('end', () => {
                       const ms = performance.now() - (sentAt ?? performance.now());
                       stats.requests++; stats.total += ms;
-                      stats.last = ms.toFixed(1) + ' ms (' + request.outcome + ', attempt ' + request.attempt + ')';
+                      stats.last = fmt(client.__tourTexts.last, ms.toFixed(1), request.outcome, request.attempt);
                       show();
                     });
                   });
                   client.events.addEventListener('vaadin-server-message', () => { stats.messages++; show(); });
                 }
                 """)
-        void track();
+        void track(String statsTemplate, String lastTemplate);
     }
 
     private final LifecycleRecorder recorder;
     final ValueSignal<LifecycleRecorder.Stats> stats = new ValueSignal<>(LifecycleRecorder.Stats.EMPTY);
     final Div events = new Div();
     private String shownFirst = "";
-    final Span browser = new Span("Browser: waiting for the first request…");
-    final Checkbox postpone = new Checkbox("Postpone the next navigation away from this page");
+    final Span browser = new Span();
+    final Checkbox postpone = new Checkbox();
     private int step;
 
     public LifecycleView(LifecycleRecorder recorder) {
         super("Lifecycle Events",
-                "The service event bus from 25.3 now also reports the start and end of every request and navigation, with "
-                        + "outcome, duration and handler. In the browser, the client engine fires events for each request "
-                        + "and server message. Observability Kit uses the same events.",
+                Messages.get("flow.lifecycle.lead"),
                 "https://vaadin.com/docs/next/flow/advanced/session-lock-and-rpc-listeners");
         this.recorder = recorder;
+        browser.setText(Messages.get("flow.lifecycle.browser.waiting"));
+        postpone.setLabel(Messages.get("flow.lifecycle.postpone"));
 
         addDashboard();
         addPlayground();
@@ -96,7 +99,8 @@ public class LifecycleView extends ShowcasePage implements BeforeLeaveObserver {
                 ui.access(() -> refresh(ui));
             }
         }, 1000, 1000);
-        browser.getElement().executeJs(RoundTripJs.class).track();
+        browser.getElement().executeJs(RoundTripJs.class).track(
+                ui.getTranslation("flow.lifecycle.browser.stats"), ui.getTranslation("flow.lifecycle.browser.last"));
         return timer::cancel;
     }
 
@@ -110,7 +114,9 @@ public class LifecycleView extends ShowcasePage implements BeforeLeaveObserver {
             // request of its own, which would show up here and refresh again
             shownFirst = first;
             events.removeAll();
-            events.add(line("Time", "Event", "Handler / location", "Outcome", "Duration"));
+            events.add(line(Messages.get("flow.lifecycle.col.time"), Messages.get("flow.lifecycle.col.event"),
+                    Messages.get("flow.lifecycle.col.handler"), Messages.get("flow.lifecycle.col.outcome"),
+                    Messages.get("flow.lifecycle.col.duration")));
             recent.stream().limit(25).forEach(e -> events.add(line(e.time(), e.type(), e.detail(), e.outcome(),
                     e.millis() == 0 ? "" : String.format("%.2f ms", e.millis()))));
         }
@@ -118,20 +124,18 @@ public class LifecycleView extends ShowcasePage implements BeforeLeaveObserver {
 
     private void addDashboard() {
         var tiles = new FlexLayout(
-                new StatTile("Requests started / ended", () -> stats.get().requestsStarted() + " / " + stats.get().requestsEnded()),
-                new StatTile("Avg. request", () -> String.format("%.2f ms", stats.get().avgRequestMs())),
-                new StatTile("Navigations", () -> String.valueOf(stats.get().navigations())),
-                new StatTile("Avg. navigation", () -> String.format("%.2f ms", stats.get().avgNavigationMs())),
-                new StatTile("RPC invocations", () -> String.valueOf(stats.get().rpcCalls())));
+                new StatTile(Messages.get("flow.lifecycle.tile.requests"), () -> stats.get().requestsStarted() + " / " + stats.get().requestsEnded()),
+                new StatTile(Messages.get("flow.lifecycle.tile.avgRequest"), () -> String.format("%.2f ms", stats.get().avgRequestMs())),
+                new StatTile(Messages.get("flow.lifecycle.tile.navigations"), () -> String.valueOf(stats.get().navigations())),
+                new StatTile(Messages.get("flow.lifecycle.tile.avgNavigation"), () -> String.format("%.2f ms", stats.get().avgNavigationMs())),
+                new StatTile(Messages.get("flow.lifecycle.tile.rpc"), () -> String.valueOf(stats.get().rpcCalls())));
         tiles.addClassName("stat-tiles");
 
         events.addClassName("lifecycle-log");
         events.setTestId("lifecycle-events");
 
-        addDemo("Your session, live",
-                "A VaadinServiceInitListener records the events of every session from startup, so this dashboard also "
-                        + "shows navigations that left this page. The first request of a page load starts before there is a session, "
-                        + "so it is counted when it ends but not when it starts.",
+        addDemo(Messages.get("flow.lifecycle.dashboard.heading"),
+                Messages.get("flow.lifecycle.dashboard.desc"),
                 new VerticalLayout(tiles, events), """
                         @Component
                         public class LifecycleRecorder implements VaadinServiceInitListener {
@@ -162,28 +166,25 @@ public class LifecycleView extends ShowcasePage implements BeforeLeaveObserver {
     }
 
     private void addPlayground() {
-        var sameRoute = new Button("Navigate with ?step=n", e -> UI.getCurrentOrThrow()
+        var sameRoute = new Button(Messages.get("flow.lifecycle.nav.step"), e -> UI.getCurrentOrThrow()
                 .navigate(LifecycleView.class, QueryParameters.of("step", String.valueOf(++step))));
         sameRoute.setTestId("navigate-step");
-        var broken = new Button("Navigate to a failing route", e -> UI.getCurrentOrThrow().navigate(BrokenView.class));
-        var home = new RouterLink("Go to Home (come back with Back)", HomeView.class);
+        var broken = new Button(Messages.get("flow.lifecycle.nav.broken"), e -> UI.getCurrentOrThrow().navigate(BrokenView.class));
+        var home = new RouterLink(Messages.get("flow.lifecycle.nav.home"), HomeView.class);
         postpone.setTestId("postpone");
 
         var row = new FlexLayout(sameRoute, broken, home);
         row.addClassName("showcase-row");
-        addDemo("Generate some navigations",
-                "Each kind of outcome: completed, failed (the error view is shown), and postponed when the checkbox is on. "
-                        + "Come back to this page after leaving it to see the events that happened meanwhile.",
+        addDemo(Messages.get("flow.lifecycle.playground.heading"),
+                Messages.get("flow.lifecycle.playground.desc"),
                 new VerticalLayout(row, postpone), "");
     }
 
     private void addBrowserDemo() {
         browser.addClassName("showcase-status");
         browser.setTestId("round-trip");
-        addDemo("Round trips, measured in the browser",
-                "window.Vaadin.Flow.clients[appId].events fires vaadin-request and vaadin-server-message. The script is a "
-                        + "@JsDefinition, and it writes into the page directly: reporting each round trip to the server "
-                        + "would cause another round trip.",
+        addDemo(Messages.get("flow.lifecycle.browser.heading"),
+                Messages.get("flow.lifecycle.browser.desc"),
                 browser, """
                         client.events.addEventListener('vaadin-request', ({ detail: request }) => {
                           let sentAt;
@@ -200,7 +201,7 @@ public class LifecycleView extends ShowcasePage implements BeforeLeaveObserver {
         if (postpone.getValue() && event.getNavigationTarget() != LifecycleView.class) {
             postpone.setValue(false);
             event.postpone();
-            Notification.show("Navigation postponed. Look for the 'postponed' outcome.");
+            Notification.show(Messages.get("flow.lifecycle.postponed.notification"));
         }
     }
 }

@@ -11,6 +11,6 @@ import com.vaadin.flow.router.Route;
 public class SecurityArea extends AreaPage {
 
     public SecurityArea() {
-        super("Security", "Run under a strict Content Security Policy, with JavaScript declared in Java instead of sent as strings.");
+        super("security");
     }
 }

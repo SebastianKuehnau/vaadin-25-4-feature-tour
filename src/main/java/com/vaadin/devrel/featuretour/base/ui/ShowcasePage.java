@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.base.ui;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Anchor;
@@ -33,11 +34,11 @@ public abstract class ShowcasePage extends VerticalLayout {
             badges.add(tier.badge());
         }
 
-        var docs = new Anchor(docsUrl, "Read the docs →");
+        var docs = new Anchor(docsUrl, Messages.get("link.docs"));
         docs.setTarget(AnchorTarget.BLANK);
         docs.addClassName("showcase-docs");
 
-        var header = new Div(badges, new H1(title), new Paragraph(lead), docs);
+        var header = new Div(badges, new H1(Messages.title(title)), new Paragraph(lead), docs);
         header.addClassName("showcase-header");
         add(header);
     }
@@ -55,7 +56,7 @@ public abstract class ShowcasePage extends VerticalLayout {
         if (!code.isBlank()) {
             var pre = new Pre(code.strip());
             pre.addClassName("showcase-code");
-            var details = new Details("Show Java code", pre);
+            var details = new Details(Messages.get("code.show"), pre);
             details.addClassName("showcase-code-details");
             section.add(details);
         }

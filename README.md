@@ -32,6 +32,12 @@ Built with Vaadin Flow 25.4.0-beta2, Spring Boot 4.2 and the Aura theme.
 | Tooling | Copilot 25.4 | Guided page: Browserless tests from the recorder, Kotlin views, auto-responsive Form Layout, Component Gallery, drilldown, optimistic updates | – |
 | | Under the Hood | Hilla TypeScript in Java, leaner `vaadin-spring`, Node.js 26, Spring Boot 4.2, CDI/Quarkus versioning, breaking changes | – |
 
+## Languages
+
+All labels, texts and notes of the app are available in English (default), German, French,
+Spanish, Italian and Portuguese. Pick the language with the flags in the top bar; the choice is kept in a cookie, and the
+browser language is used until then. Translations live in `src/main/resources/messages_*.properties` and `src/main/resources/i18n/<area>_*.properties`. Java code snippets and API names stay untouched.
+
 ## Running the app
 
 Requirements: Java 21 or later. Maven and Node.js are handled by the wrapper and the Vaadin plugin (it downloads

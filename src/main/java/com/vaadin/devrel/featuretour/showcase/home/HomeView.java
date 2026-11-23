@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.home;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.FeatureCards;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.AnchorTarget;
@@ -24,14 +25,13 @@ public class HomeView extends VerticalLayout {
     public HomeView() {
         addClassName("home-view");
 
-        var eyebrow = new Span("Beta 2 · Curated by Vaadin DevRel");
+        var eyebrow = new Span(Messages.get("home.eyebrow"));
         eyebrow.addClassName("home-eyebrow");
-        var title = new H1("What's new in Vaadin 25.4");
-        var lead = new Paragraph("A hands-on tour of the release: security, framework APIs, "
-                + "components, AI and tooling. Every page is a live demo with the Java code behind it.");
-        var releaseNotes = new Anchor("https://github.com/vaadin/platform/releases/tag/25.4.0-beta2", "Release notes");
+        var title = new H1(Messages.get("home.title"));
+        var lead = new Paragraph(Messages.get("home.lead"));
+        var releaseNotes = new Anchor("https://github.com/vaadin/platform/releases/tag/25.4.0-beta2", Messages.get("link.releaseNotes"));
         releaseNotes.setTarget(AnchorTarget.BLANK);
-        var docs = new Anchor("https://vaadin.com/docs/next", "Docs for the next release");
+        var docs = new Anchor("https://vaadin.com/docs/next", Messages.get("link.docsNext"));
         docs.setTarget(AnchorTarget.BLANK);
         var links = new HorizontalLayout(releaseNotes, docs);
         var hero = new Div(eyebrow, title, lead, links);
@@ -41,7 +41,7 @@ public class HomeView extends VerticalLayout {
         // One section per area, built from the same menu tree as the side nav
         for (MenuEntry area : MenuConfiguration.getMenuEntriesTree()) {
             if (!area.children().isEmpty()) {
-                var section = new Div(new H2(area.title()), new FeatureCards(area.children()));
+                var section = new Div(new H2(Messages.title(area.title())), new FeatureCards(area.children()));
                 section.addClassName("home-section");
                 add(section);
             }

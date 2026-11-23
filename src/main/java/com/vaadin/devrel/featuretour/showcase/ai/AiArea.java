@@ -11,6 +11,6 @@ import com.vaadin.flow.router.Route;
 public class AiArea extends AreaPage {
 
     public AiArea() {
-        super("AI", "Paging for the AI Grid and a smarter Message Input.");
+        super("ai");
     }
 }

@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.components;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
@@ -21,28 +22,27 @@ public class ButtonView extends ShowcasePage {
 
     static final long SLOW_MILLIS = 2000;
 
-    final Button plain = new Button("Save (no protection)");
-    final Button untilEnabled = new Button("Save (setDisableOnClick(true))");
-    final Button untilResponse = new Button("Save (UNTIL_RESPONSE)");
-    final Span plainCount = new Span("0 saves");
-    final Span enabledCount = new Span("0 saves");
-    final Span responseCount = new Span("0 saves");
+    final Button plain = new Button(Messages.get("components.button.save.none"));
+    final Button untilEnabled = new Button(Messages.get("components.button.save.with", "setDisableOnClick(true)"));
+    final Button untilResponse = new Button(Messages.get("components.button.save.with", "UNTIL_RESPONSE"));
+    final Span plainCount = new Span(saves(0));
+    final Span enabledCount = new Span(saves(0));
+    final Span responseCount = new Span(saves(0));
     int plainSaves;
     int enabledSaves;
     int responseSaves;
 
     public ButtonView() {
         super("Button",
-                "DisableOnClickMode.UNTIL_RESPONSE disables the button on click and enables it again automatically "
-                        + "with the next response, once the click listeners have run. Each listener here takes 2 seconds.",
+                Messages.get("components.button.lead"),
                 "https://vaadin.com/docs/next/components/button");
 
         plain.addClickListener(e -> plainCount.setText(saves(++plainSaves) + slowSave()));
         plain.setTestId("plain");
 
         untilEnabled.setDisableOnClick(true);
-        untilEnabled.addClickListener(e -> enabledCount.setText(saves(++enabledSaves) + slowSave()
-                + " · stays disabled until setEnabled(true)"));
+        untilEnabled.addClickListener(e -> enabledCount.setText(
+                Messages.get("components.button.disabledUntil", saves(++enabledSaves) + slowSave())));
         untilEnabled.setTestId("until-enabled");
         var reEnable = new Button("setEnabled(true)", e -> untilEnabled.setEnabled(true));
 
@@ -52,16 +52,16 @@ public class ButtonView extends ShowcasePage {
         responseCount.setTestId("response-count");
 
         var compare = new Div(
-                column("Before: no protection", "Double-click: both clicks are queued, so you save twice.",
+                column(Messages.get("components.button.col1.title"), Messages.get("components.button.col1.text"),
                         plain, plainCount),
-                column("Before: setDisableOnClick(true)", "Safe, but you must enable the button yourself, also on errors.",
+                column(Messages.get("components.button.col2.title"), Messages.get("components.button.col2.text"),
                         untilEnabled, enabledCount, reEnable),
-                column("25.4: UNTIL_RESPONSE", "Disabled while the server works, enabled again by the response.",
+                column(Messages.get("components.button.col3.title"), Messages.get("components.button.col3.text"),
                         untilResponse, responseCount));
         compare.addClassName("compare-grid");
 
-        addDemo("Double-click each button",
-                "All three listeners sleep for 2 seconds to simulate a slow save.",
+        addDemo(Messages.get("components.button.heading"),
+                Messages.get("components.button.desc"),
                 compare, """
                         Button save = new Button("Save");
                         save.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
@@ -76,7 +76,7 @@ public class ButtonView extends ShowcasePage {
     }
 
     private static String saves(int count) {
-        return count + (count == 1 ? " save" : " saves");
+        return Messages.get(count == 1 ? "components.button.saves.one" : "components.button.saves.other", count);
     }
 
     private static String slowSave() {

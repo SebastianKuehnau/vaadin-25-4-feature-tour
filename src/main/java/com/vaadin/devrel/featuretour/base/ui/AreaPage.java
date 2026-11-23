@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.base.ui;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -17,9 +18,9 @@ import java.util.Optional;
  */
 public abstract class AreaPage extends VerticalLayout {
 
-    protected AreaPage(String title, String lead) {
+    protected AreaPage(String area) {
         addClassName("home-view");
-        var hero = new Div(new H1(title), new Paragraph(lead));
+        var hero = new Div(new H1(Messages.get("nav." + area)), new Paragraph(Messages.get("area." + area + ".lead")));
         hero.addClassName("home-hero");
         add(hero, new FeatureCards(children()));
     }

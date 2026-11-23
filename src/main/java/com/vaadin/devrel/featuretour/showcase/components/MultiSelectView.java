@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.components;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
@@ -24,14 +25,13 @@ public class MultiSelectView extends ShowcasePage {
             "Netherlands", "New Zealand", "Norway", "Poland", "Portugal", "Spain", "Sweden", "Switzerland",
             "United Kingdom", "United States");
 
-    final MultiSelectComboBox<String> countries = new MultiSelectComboBox<>("Countries");
+    final MultiSelectComboBox<String> countries = new MultiSelectComboBox<>(Messages.get("components.multiselect.countries"));
     final Span selection = new Span();
-    final MultiSelectComboBox<String> lazy = new MultiSelectComboBox<>("Countries (lazy data provider)");
+    final MultiSelectComboBox<String> lazy = new MultiSelectComboBox<>(Messages.get("components.multiselect.lazy"));
 
     public MultiSelectView() {
         super("Multi-Select Combo Box",
-                "A Select all button above the items selects or deselects all of them, or only the ones that match "
-                        + "the filter you typed.",
+                Messages.get("components.multiselect.lead"),
                 "https://vaadin.com/docs/next/components/multi-select-combo-box");
 
         addInMemoryDemo();
@@ -45,12 +45,11 @@ public class MultiSelectView extends ShowcasePage {
         countries.setTestId("countries");
         selection.addClassName("showcase-status");
         selection.setTestId("selection");
-        selection.setText("0 selected");
-        countries.addValueChangeListener(e -> selection.setText(e.getValue().size() + " selected"));
+        selection.setText(Messages.get("components.multiselect.selected", 0));
+        countries.addValueChangeListener(e -> selection.setText(Messages.get("components.multiselect.selected", e.getValue().size())));
 
-        addDemo("Select all, or all filtered items",
-                "Open the dropdown and press Select All. Then clear, type \"land\": the button turns into Select Filtered, "
-                        + "and only the six matching countries are selected. The others keep their state.",
+        addDemo(Messages.get("components.multiselect.inmemory.heading"),
+                Messages.get("components.multiselect.inmemory.desc"),
                 new VerticalLayout(countries, selection), """
                         MultiSelectComboBox<String> countries = new MultiSelectComboBox<>("Countries");
                         countries.setItems(COUNTRIES);
@@ -66,10 +65,8 @@ public class MultiSelectView extends ShowcasePage {
         lazy.setWidth("28rem");
         lazy.setTestId("countries-lazy");
 
-        addDemo("Hidden with lazy data",
-                "The same setting on a combo box with a lazy data provider: the button stays hidden, because selecting "
-                        + "all would mean fetching every item from the backend. isSelectAllButtonVisible() still returns "
-                        + lazy.isSelectAllButtonVisible() + ", it reports the setting, not the effective visibility.",
+        addDemo(Messages.get("components.multiselect.lazy.heading"),
+                Messages.get("components.multiselect.lazy.desc", String.valueOf(lazy.isSelectAllButtonVisible())),
                 lazy, """
                         lazy.setItems(query -> service.fetch(query.getFilter(), query.getOffset(), query.getLimit()));
                         lazy.setSelectAllButtonVisible(true); // no effect with lazy data

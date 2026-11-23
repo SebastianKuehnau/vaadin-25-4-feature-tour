@@ -1,5 +1,6 @@
 package com.vaadin.devrel.featuretour.showcase.ai;
 
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
 import com.vaadin.flow.component.UI;
@@ -38,12 +39,11 @@ public class AiGridView extends AiPage {
     final Div pagingLog = new Div();
     final Span status = new Span();
     final MessageInput manualInput = new MessageInput();
-    final Switch busy = new Switch("Request running");
+    final Switch busy = new Switch();
 
     public AiGridView(AiSupport ai, SalesDatabase database) {
         super(ai, "AI Grid Paging",
-                "The AI Grid no longer loads the whole result of the LLM's query. It pages lazily through your "
-                        + "DatabaseProvider, so \"show all orders\" works on large tables too.",
+                Messages.get("ai.grid.lead"),
                 "https://vaadin.com/docs/next/flow/ai-support/ai-powered-grid",
                 Tier.COMMERCIAL, Tier.PREVIEW);
 
@@ -53,31 +53,32 @@ public class AiGridView extends AiPage {
 
     private void addGridDemo(AiSupport ai, SalesDatabase database) {
         grid.setHeight("22rem");
-        grid.setEmptyStateText("Ask for example: show all orders from 2026 with the newest first");
+        grid.setEmptyStateText(Messages.get("ai.grid.empty"));
         grid.setTestId("ai-grid");
         input.setWidthFull();
         input.setTestId("ai-input");
         status.addClassName("showcase-status");
         pagingLog.addClassName("csp-warnings");
         pagingLog.setTestId("paging-log");
-        pagingLog.add(new Span("Page requests from the grid appear here. Scroll the grid to load more."));
+        pagingLog.add(new Span(Messages.get("ai.grid.logHint")));
 
         if (ai.isConfigured()) {
             UI ui = UI.getCurrentOrThrow();
+            String thinking = Messages.get("ai.grid.thinking");
+            String done = Messages.get("ai.grid.done");
             var provider = new PagingDatabaseProvider(database.readOnlyDataSource(), line -> ui.access(() -> log(line)));
             AIOrchestrator.builder(ai.newProvider(), SYSTEM_PROMPT)
                     .withInput(input)
                     .withController(new GridAIController(grid, provider))
-                    .withRequestListener(event -> status.setText("⏳ Thinking… (submit is disabled meanwhile)"))
-                    .withResponseListener(event -> ui.access(() -> status.setText("✅ Done")))
+                    .withRequestListener(event -> status.setText(thinking))
+                    .withResponseListener(event -> ui.access(() -> status.setText(done)))
                     .build();
         } else {
             input.setEnabled(false);
         }
 
-        addDemo("Lazy loading through your DatabaseProvider",
-                "The sales table has 1,500 rows. Ask for all of them and scroll: the grid asks the provider for one page "
-                        + "at a time and for the total count. While the LLM works, the orchestrator disables submitting.",
+        addDemo(Messages.get("ai.grid.demo1.heading"),
+                Messages.get("ai.grid.demo1.desc"),
                 new VerticalLayout(input, status, grid, pagingLog), """
                         class JdbcDatabaseProvider implements DatabaseProvider {
                             public String getSchema() { ... }
@@ -110,11 +111,11 @@ public class AiGridView extends AiPage {
     private void addSubmitDisabledDemo() {
         manualInput.setWidthFull();
         manualInput.setTestId("manual-input");
+        busy.setLabel(Messages.get("ai.grid.busy"));
         busy.setTestId("busy");
         busy.addValueChangeListener(e -> manualInput.setSubmitDisabled(e.getValue()));
-        addDemo("Message Input: submitDisabled",
-                "The same API for your own flows, no LLM needed. While submitting is disabled, the user can keep typing "
-                        + "the next message, unlike setEnabled(false).",
+        addDemo(Messages.get("ai.grid.demo2.heading"),
+                Messages.get("ai.grid.demo2.desc"),
                 new VerticalLayout(busy, manualInput), """
                         messageInput.setSubmitDisabled(true);  // typing still works
                         messageInput.setSubmitDisabled(false);

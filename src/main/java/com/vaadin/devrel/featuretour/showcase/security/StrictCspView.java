@@ -3,6 +3,7 @@ package com.vaadin.devrel.featuretour.showcase.security;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
+import com.vaadin.devrel.featuretour.base.i18n.Messages;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
@@ -46,23 +47,20 @@ public class StrictCspView extends ShowcasePage {
     }
 
     final Span mode = new Span();
-    final Button legacy = new Button("Legacy: executeJs(String)");
-    final Button declared = new Button("Declared: executeJs(TextJs.class)");
-    final Span target = new Span("Waiting for JavaScript…");
+    final Button legacy = new Button(Messages.get("security.strictcsp.legacy.button"));
+    final Button declared = new Button(Messages.get("security.strictcsp.declared.button"));
+    final Span target = new Span(Messages.get("security.strictcsp.target.waiting"));
     final Span status = new Span();
     final Div warnings = new Div();
 
     public StrictCspView() {
         super("Strict CSP",
-                "Flow can now run under a nonce-based Content-Security-Policy without 'unsafe-eval'. "
-                        + "Set vaadin.csp=warn to find every call that sends JavaScript as a string, fix them, then switch to strict.",
+                Messages.get("security.strictcsp.lead"),
                 "https://vaadin.com/docs/next/flow/security/protections/content-security-policy");
 
         addModeDemo();
         addLegacyDemo();
-        addNote("Beta 2: Vaadin itself still sends string JavaScript in a few places, such as the event filters of "
-                + "double and single click listeners and keyboard shortcuts. Those throw in strict mode until they are "
-                + "changed, so try strict on a copy of your app first and keep warn for now.", true);
+        addNote(Messages.get("security.strictcsp.note"), true);
     }
 
     private void addModeDemo() {
@@ -71,24 +69,21 @@ public class StrictCspView extends ShowcasePage {
         var badge = new Badge("vaadin.csp=" + current.name().toLowerCase());
         badge.addThemeVariants(current == CspMode.OFF ? BadgeVariant.CONTRAST : current == CspMode.WARN
                 ? BadgeVariant.WARNING : BadgeVariant.SUCCESS);
-        mode.setText((production ? "Production" : "Development") + " mode. Restart with VAADIN_CSP=off|warn|strict to switch.");
+        mode.setText(Messages.get(production ? "security.strictcsp.mode.production" : "security.strictcsp.mode.development"));
         mode.addClassName("showcase-status");
 
         var table = new Div(
-                row("off", "Default. Nothing is checked.", "No header."),
-                row("warn", "String JavaScript runs, and each call site is logged once with a stack trace to your code.",
-                        "Same as dev. No header."),
-                row("strict", "String JavaScript throws CspViolationException, in dev mode too.",
-                        "Also sends a nonce-based Content-Security-Policy header."));
+                row("off", Messages.get("security.strictcsp.table.off.all"), Messages.get("security.strictcsp.table.off.prod")),
+                row("warn", Messages.get("security.strictcsp.table.warn.all"), Messages.get("security.strictcsp.table.warn.prod")),
+                row("strict", Messages.get("security.strictcsp.table.strict.all"), Messages.get("security.strictcsp.table.strict.prod")));
         table.addClassName("csp-table");
-        var header = row("Mode", "Development and production", "Production only");
+        var header = row(Messages.get("security.strictcsp.table.mode"), Messages.get("security.strictcsp.table.everywhere"), Messages.get("security.strictcsp.table.production"));
         header.addClassName("csp-header");
         table.addComponentAsFirst(header);
 
         mode.setTestId("csp-mode");
-        addDemo("The current mode",
-                "The mode applies to development and production alike. The only difference is the header: in "
-                        + "development mode no header is sent, because the dev server and dev tools need eval.",
+        addDemo(Messages.get("security.strictcsp.mode.heading"),
+                Messages.get("security.strictcsp.mode.desc"),
                 new VerticalLayout(new FlexLayout(badge), mode, table), """
                         # application.properties
                         vaadin.csp=warn
@@ -117,27 +112,25 @@ public class StrictCspView extends ShowcasePage {
         target.addClassName("csp-target");
         status.addClassName("showcase-status");
         warnings.addClassName("csp-warnings");
-        warnings.add(new Span("No warnings captured yet."));
+        warnings.add(new Span(Messages.get("security.strictcsp.warnings.none")));
 
         legacy.addClickListener(e -> {
             try {
-                target.getElement().executeJs("this.textContent = $0", "Set by a string, compiled in the browser");
-                status.setText("Ran. In warn mode the first call from this line is logged below.");
+                target.getElement().executeJs("this.textContent = $0", Messages.get("security.strictcsp.legacy.set"));
+                status.setText(Messages.get("security.strictcsp.legacy.ran"));
             } catch (CspViolationException violation) {
-                status.setText("Blocked: " + violation.getClass().getSimpleName() + " (strict mode)");
+                status.setText(Messages.get("security.strictcsp.legacy.blocked", violation.getClass().getSimpleName()));
             }
         });
         declared.addClickListener(e -> {
-            target.getElement().executeJs(TextJs.class).setText("Set by declared JavaScript from the bundle");
-            status.setText("Ran. Declared JavaScript is never reported: nothing is compiled in the browser.");
+            target.getElement().executeJs(TextJs.class).setText(Messages.get("security.strictcsp.declared.set"));
+            status.setText(Messages.get("security.strictcsp.declared.ran"));
         });
 
         whenAttached(this::captureWarnings);
 
-        addDemo("A legacy call next to its declared replacement",
-                "Both buttons set the text below. The first sends JavaScript as a string, which a strict policy blocks. "
-                        + "The second calls an interface method whose JavaScript is collected into the bundle at build time. "
-                        + "Warnings from the CSP reporter's logger appear below as they are logged.",
+        addDemo(Messages.get("security.strictcsp.legacy.heading"),
+                Messages.get("security.strictcsp.legacy.desc"),
                 new VerticalLayout(row(legacy, declared), target, status, warnings), """
                         // Legacy: compiled from a string in the browser
                         target.getElement().executeJs("this.textContent = $0", text);

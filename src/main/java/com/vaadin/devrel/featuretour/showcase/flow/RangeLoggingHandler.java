@@ -24,7 +24,8 @@ final class RangeLoggingHandler implements DownloadHandler {
     public void handleDownloadRequest(DownloadEvent event) throws IOException {
         String range = event.getRequest().getHeader("Range");
         delegate.handleDownloadRequest(event);
-        log.accept(range == null ? "whole file" : range);
+        // null means the whole file; the view translates that label
+        log.accept(range);
     }
 
     @Override

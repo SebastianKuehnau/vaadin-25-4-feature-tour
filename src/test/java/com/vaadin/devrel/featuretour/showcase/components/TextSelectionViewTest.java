@@ -34,7 +34,8 @@ class TextSelectionViewTest extends SpringBrowserlessTest {
         view.versionForm.validate();
 
         assertThat(version.isInvalid()).isTrue();
-        assertThat($(Span.class).testId("version-result").getText()).contains("position 10", "\"ta2\"");
+        assertThat(version.getErrorMessage()).startsWith("\"ta2\" doesn't fit");
+        assertThat($(Span.class).testId("version-result").getText()).as("one error message, in the field").isEmpty();
         // The selection is declared JavaScript: check the call that will be sent to the browser
         assertThat(pendingCalls()).anySatisfy(call -> {
             assertThat(call.methodName()).isEqualTo("setSelectionRange");
@@ -51,6 +52,19 @@ class TextSelectionViewTest extends SpringBrowserlessTest {
 
         assertThat($(TextField.class).testId("version").isInvalid()).isFalse();
         assertThat($(Span.class).testId("version-result").getText()).isEqualTo("✅ Saved 25.4.0-beta2");
+    }
+
+    @Test
+    void editing_the_value_clears_the_previous_result() {
+        var view = navigate(TextSelectionView.class);
+        TextField version = $(TextField.class).testId("version");
+        test(version).setValue("25.4.0");
+        view.versionForm.validate();
+        assertThat($(Span.class).testId("version-result").getText()).isEqualTo("✅ Saved 25.4.0");
+
+        test(version).setValue("25.4.1");
+
+        assertThat($(Span.class).testId("version-result").getText()).isEmpty();
     }
 
     private static List<JsCall> pendingCalls() {

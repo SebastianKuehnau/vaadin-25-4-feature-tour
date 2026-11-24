@@ -50,7 +50,7 @@ public class DeclaredJsView extends ShowcasePage {
         DomEventFilter isKey(String key);
     }
 
-    static final KeyFilters FILTERS = JsSnippets.of(KeyFilters.class);
+    public static final KeyFilters FILTERS = JsSnippets.of(KeyFilters.class);
 
     final TextField snippet = new TextField("Text to copy", "VAADIN_CSP=strict ./mvnw", "");
     final StatusText copyStatus = new StatusText("copy-status");

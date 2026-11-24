@@ -4,12 +4,14 @@ import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.StatusText;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
+import com.vaadin.devrel.featuretour.showcase.security.DeclaredJsView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -44,13 +46,20 @@ public class TextSelectionView extends ShowcasePage {
         VersionForm() {
             version.setWidth("20rem");
             version.setTestId("version");
-            version.setErrorMessage("Expected something like 25.4.0 or 25.4.0-beta2");
             var save = new Button("Save", e -> validate());
             save.addThemeVariants(ButtonVariant.PRIMARY);
             save.setTestId("save-version");
             var row = new HorizontalLayout(version, save);
             row.setAlignItems(Alignment.BASELINE);
             add(row, result);
+
+            // The result is about the value that was saved, so it goes away when the user edits
+            version.setValueChangeMode(ValueChangeMode.LAZY);
+            version.addValueChangeListener(e -> result.setText(""));
+            // Enter saves, as the primary button suggests. A declared filter keeps it
+            // CSP-safe, unlike a click shortcut, which still sends string JavaScript in beta 2.
+            version.getElement().addEventListener("keydown", e -> validate())
+                    .setFilterExpression(DeclaredJsView.FILTERS.isKey("Enter"));
         }
 
         void validate() {
@@ -61,10 +70,11 @@ public class TextSelectionView extends ShowcasePage {
                 result.setText("✅ Saved " + value);
                 return;
             }
+            version.setErrorMessage("\"" + value.substring(bad) + "\" doesn't fit, it's selected for you. "
+                    + "Expected something like 25.4.0 or 25.4.0-beta2.");
             version.setInvalid(true);
             version.focus();
             version.setSelectionRange(bad, value.length());
-            result.setText("❌ Invalid from position " + bad + ": \"" + value.substring(bad) + "\" is selected");
         }
     }
 
@@ -80,6 +90,7 @@ public class TextSelectionView extends ShowcasePage {
                                 String value = version.getValue();
                                 int bad = firstInvalidIndex(value);
                                 if (bad >= 0) {
+                                    version.setErrorMessage("\"" + value.substring(bad) + "\" doesn't fit, it's selected for you.");
                                     version.setInvalid(true);
                                     version.focus();
                                     version.**setSelectionRange(bad, value.length())**;

@@ -18,7 +18,8 @@ Built with Vaadin Flow 25.4.0-beta2, Spring Boot 4.2 and the Aura theme.
 | | Downloads Everywhere | `Download.onClick()` on a Card, `DownloadTarget.NEW_TAB`, `Button.setDownloadHandler()`, Menu Bar and Context Menu items | Free |
 | | Hierarchical Menus | `@Menu(parent = ...)` and `MenuConfiguration.getMenuEntriesTree()` build this app's own side nav | Free |
 | | Lifecycle Events | Request and navigation start/end with handler, outcome and duration; `vaadin-request` / `vaadin-server-message` round trips in the browser | Free |
-| | Styling | `@StyleSheet(layer = "...")` losing to app styles on purpose, `@JavaScript(type = MODULE)` | Free |
+| | Styling | `@StyleSheet(layer = "...")` losing to app styles on purpose | Free |
+| | Runtime ES Modules | `@JavaScript(type = MODULE)` loads a plain ES module at runtime without Vite, `Page.addJavaScript(url, loadMode, type)` | Free |
 | | Small API Wins | `withNullSafeConverter`, `Component.findAncestor(predicate)`, `ExtendedClientDetails.getZoneId()`, `RouteConfiguration.getUrl()` with query parameters | Free |
 | Components | PDF Viewer | From a URL and a `DownloadHandler`, page navigation and zoom from Java, page signals, custom toolbar button | Commercial, preview |
 | | Forms: Labels Aside | `LABEL_ASIDE` on eight field types, `FormLayout.setLabelTextAlign()` | Free |

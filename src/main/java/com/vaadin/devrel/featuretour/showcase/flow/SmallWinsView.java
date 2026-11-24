@@ -27,7 +27,7 @@ import java.time.format.DateTimeFormatter;
 
 @Route("small-api-wins")
 @PageTitle("Small API Wins")
-@Menu(title = "Small API Wins", parent = FlowArea.class, order = 6)
+@Menu(title = "Small API Wins", parent = FlowArea.class, order = 7)
 @ShowcaseInfo(summary = "Null-safe converters, findAncestor(predicate), browser time zone, URLs with query parameters.", tiers = Tier.FREE)
 public class SmallWinsView extends ShowcasePage {
 

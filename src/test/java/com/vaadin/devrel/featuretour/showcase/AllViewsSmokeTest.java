@@ -18,6 +18,7 @@ import com.vaadin.devrel.featuretour.showcase.flow.LifecycleView;
 import com.vaadin.devrel.featuretour.showcase.flow.MediaView;
 import com.vaadin.devrel.featuretour.showcase.flow.MenusView;
 import com.vaadin.devrel.featuretour.showcase.flow.SmallWinsView;
+import com.vaadin.devrel.featuretour.showcase.flow.RuntimeModulesView;
 import com.vaadin.devrel.featuretour.showcase.flow.StylingView;
 import com.vaadin.devrel.featuretour.showcase.home.HomeView;
 import com.vaadin.devrel.featuretour.showcase.security.DeclaredJsView;
@@ -43,7 +44,7 @@ class AllViewsSmokeTest extends SpringBrowserlessTest {
     @ValueSource(classes = {HomeView.class,
             SecurityArea.class, StrictCspView.class, DeclaredJsView.class,
             FlowArea.class, MediaView.class, DownloadsView.class, MenusView.class, LifecycleView.class,
-            StylingView.class, SmallWinsView.class,
+            StylingView.class, RuntimeModulesView.class, SmallWinsView.class,
             ComponentsArea.class, PdfViewerView.class, LabelsAsideView.class, MultiSelectView.class,
             TextSelectionView.class, ButtonView.class, GridView.class, NowStableView.class, AccessibilityView.class,
             AiArea.class, AiGridView.class,

@@ -21,7 +21,7 @@ public abstract class AreaPage extends VerticalLayout {
         addClassName("home-view");
         var hero = new Div(new H1(title), new Paragraph(lead));
         hero.addClassName("home-hero");
-        add(hero, new FeatureCards(children()));
+        add(hero, new FeatureCards(children(), 2));
     }
 
     private List<MenuEntry> children() {

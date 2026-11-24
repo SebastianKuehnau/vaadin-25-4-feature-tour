@@ -51,7 +51,7 @@ public class HomeView extends VerticalLayout {
     /** The pages of one area as cards. */
     static class AreaSection extends Div {
         AreaSection(MenuEntry area) {
-            super(new H2(area.title()), new FeatureCards(area.children()));
+            super(new H2(area.title()), new FeatureCards(area.children(), 3));
             addClassName("home-section");
         }
     }

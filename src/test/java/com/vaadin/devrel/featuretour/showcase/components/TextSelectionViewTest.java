@@ -1,12 +1,13 @@
 package com.vaadin.devrel.featuretour.showcase.components;
 
-import com.vaadin.browserless.SpringBrowserlessTest;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.browserless.BrowserlessApplicationContext;
+import com.vaadin.browserless.BrowserlessUIContext;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.js.JsCall;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
@@ -14,8 +15,28 @@ import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-class TextSelectionViewTest extends SpringBrowserlessTest {
+@SpringBootTest
+class TextSelectionViewTest {
+
+    @Autowired
+    BrowserlessApplicationContext app;
+    BrowserlessUIContext window;
+    TextSelectionView view;
+
+    @BeforeEach
+    void open() {
+        window = app.newUser().newWindow();
+        view = window.navigate(TextSelectionView.class);
+    }
+
+    @AfterEach
+    void closeUser() {
+        window.getUser().close();
+    }
+
+    String result() {
+        return window.findSpan().withTestId("version-result").getText();
+    }
 
     @Test
     void invalid_part_is_found() {
@@ -26,16 +47,15 @@ class TextSelectionViewTest extends SpringBrowserlessTest {
 
     @Test
     void failed_validation_selects_the_invalid_part() {
-        var view = navigate(TextSelectionView.class);
-        TextField version = $(TextField.class).testId("version");
-        test(version).setValue("25.4.0-betta2");
-        UI.getCurrent().getInternals().dumpPendingJavaScriptInvocations();
+        var version = window.findTextField().withTestId("version");
+        version.setValue("25.4.0-betta2");
+        pendingCalls();
 
         view.versionForm.validate();
 
-        assertThat(version.isInvalid()).isTrue();
-        assertThat(version.getErrorMessage()).startsWith("\"ta2\" doesn't fit");
-        assertThat($(Span.class).testId("version-result").getText()).as("one error message, in the field").isEmpty();
+        assertThat(version.component().isInvalid()).isTrue();
+        assertThat(version.component().getErrorMessage()).startsWith("\"ta2\" doesn't fit");
+        assertThat(result()).as("one error message, in the field").isEmpty();
         // The selection is declared JavaScript: check the call that will be sent to the browser
         assertThat(pendingCalls()).anySatisfy(call -> {
             assertThat(call.methodName()).isEqualTo("setSelectionRange");
@@ -45,30 +65,30 @@ class TextSelectionViewTest extends SpringBrowserlessTest {
 
     @Test
     void valid_version_is_saved() {
-        navigate(TextSelectionView.class);
-        test($(TextField.class).testId("version")).setValue("25.4.0-beta2");
+        var version = window.findTextField().withTestId("version");
+        version.setValue("25.4.0-beta2");
 
-        test($(com.vaadin.flow.component.button.Button.class).testId("save-version")).click();
+        window.findButton().withTestId("save-version").click();
 
-        assertThat($(TextField.class).testId("version").isInvalid()).isFalse();
-        assertThat($(Span.class).testId("version-result").getText()).isEqualTo("✅ Saved 25.4.0-beta2");
+        assertThat(version.component().isInvalid()).isFalse();
+        assertThat(result()).isEqualTo("✅ Saved 25.4.0-beta2");
     }
 
     @Test
     void editing_the_value_clears_the_previous_result() {
-        var view = navigate(TextSelectionView.class);
-        TextField version = $(TextField.class).testId("version");
-        test(version).setValue("25.4.0");
-        view.versionForm.validate();
-        assertThat($(Span.class).testId("version-result").getText()).isEqualTo("✅ Saved 25.4.0");
+        var version = window.findTextField().withTestId("version");
+        version.setValue("25.4.0");
+        window.findButton().withTestId("save-version").click();
+        assertThat(result()).isEqualTo("✅ Saved 25.4.0");
 
-        test(version).setValue("25.4.1");
+        version.setValue("25.4.1");
 
-        assertThat($(Span.class).testId("version-result").getText()).isEmpty();
+        assertThat(result()).isEmpty();
     }
 
-    private static List<JsCall> pendingCalls() {
-        return UI.getCurrent().getInternals().dumpPendingJavaScriptInvocations().stream()
+    /** Takes the JavaScript calls queued for the browser since the last call. */
+    private List<JsCall> pendingCalls() {
+        return window.getUI().getInternals().dumpPendingJavaScriptInvocations().stream()
                 .map(PendingJavaScriptInvocation::getInvocation)
                 .map(invocation -> invocation.getJsCall())
                 .filter(Objects::nonNull)

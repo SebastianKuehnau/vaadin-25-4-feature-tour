@@ -1,6 +1,7 @@
 package com.vaadin.devrel.featuretour.showcase;
 
-import com.vaadin.browserless.SpringBrowserlessTest;
+import com.vaadin.browserless.BrowserlessApplicationContext;
+import com.vaadin.browserless.BrowserlessUIContext;
 import com.vaadin.devrel.featuretour.showcase.ai.AiArea;
 import com.vaadin.devrel.featuretour.showcase.ai.AiGridView;
 import com.vaadin.devrel.featuretour.showcase.components.ButtonView;
@@ -29,8 +30,11 @@ import com.vaadin.devrel.featuretour.showcase.tooling.CopilotView;
 import com.vaadin.devrel.featuretour.showcase.tooling.ToolingArea;
 import com.vaadin.devrel.featuretour.showcase.tooling.UnderTheHoodView;
 import com.vaadin.flow.component.Component;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,8 +42,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Opens every page once, so a broken page fails the build.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-class AllViewsSmokeTest extends SpringBrowserlessTest {
+@SpringBootTest
+class AllViewsSmokeTest {
+
+    @Autowired
+    BrowserlessApplicationContext app;
+    BrowserlessUIContext window;
+
+    @BeforeEach
+    void openWindow() {
+        window = app.newUser().newWindow();
+    }
+
+    @AfterEach
+    void closeUser() {
+        window.getUser().close();
+    }
 
     @ParameterizedTest
     @ValueSource(classes = {HomeView.class,
@@ -51,6 +69,6 @@ class AllViewsSmokeTest extends SpringBrowserlessTest {
             AiArea.class, AiGridView.class,
             ToolingArea.class, CopilotView.class, UnderTheHoodView.class})
     void page_opens(Class<? extends Component> view) {
-        assertThat(navigate(view)).isInstanceOf(view);
+        assertThat(window.navigate(view)).isInstanceOf(view);
     }
 }

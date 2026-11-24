@@ -83,10 +83,13 @@ the schema, never the rows. Ask for "all orders" and scroll: the paging log show
 ./mvnw test
 ```
 
-Browserless tests using the new 25.4 testing APIs:
+Browserless tests using the application context API instead of a base class: a
+`SpringBrowserlessApplicationContext` bean (`BrowserlessContextConfiguration`) shared by the tests, and a user with a
+window of its own in each test. Highlights:
 
-- `withTestId()` / `testId()` for every lookup (the demo components have test IDs)
-- `reload()` in the Hierarchical Menus and Lifecycle Events tests
+- Typed locators for every lookup, such as `window.findButton().withTestId("save-version").click()` (the demo
+  components have test IDs)
+- `window.reload()` in the Hierarchical Menus and Lifecycle Events tests
 - `roundTrip()` to run the Lifecycle dashboard's `UI.access()` refresh
 - `UploadButton`, `UploadDropZone` and `UploadFileList` testers with successful, failed, aborted and rejected uploads
 - Dedicated tests for Text Selection (it checks the declared `setSelectionRange` call), Button `UNTIL_RESPONSE` and
@@ -136,7 +139,7 @@ What didn't work as announced, or couldn't be verified while building this tour:
 - **`RouteConfiguration.getUrl()` with query parameters** only exists as `getUrl(target, RouteParameters,
   QueryParameters)`; pass `RouteParameters.empty()`.
 - **Browserless**: `reload()` reports the new navigation with the trigger `PROGRAMMATIC`, not `REFRESH`.
-  `ButtonTester.click()` runs the before-response callbacks itself, so an `UNTIL_RESPONSE` button is enabled again when
+  A button locator's `click()` runs the before-response callbacks itself, so an `UNTIL_RESPONSE` button is enabled again when
   `click()` returns (the test checks the disabled state from a click listener). There is no tester API for text
   selection; the test inspects the pending `JsCall` instead.
 - **Not verified in the environment this tour was built in:**

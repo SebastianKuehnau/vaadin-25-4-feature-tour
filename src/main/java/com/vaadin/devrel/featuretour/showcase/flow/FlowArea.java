@@ -11,6 +11,6 @@ import com.vaadin.flow.router.Route;
 public class FlowArea extends AreaPage {
 
     public FlowArea() {
-        super("Flow", "New HTML components, downloads from any component, hierarchical menus, lifecycle events and smaller API improvements.");
+        super("Flow", "New HTML components, downloads from any component, hierarchical menus, lifecycle events and typed, null-safe everyday APIs.");
     }
 }

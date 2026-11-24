@@ -13,11 +13,11 @@ import com.vaadin.devrel.featuretour.showcase.components.NowStableView;
 import com.vaadin.devrel.featuretour.showcase.components.PdfViewerView;
 import com.vaadin.devrel.featuretour.showcase.components.TextSelectionView;
 import com.vaadin.devrel.featuretour.showcase.flow.DownloadsView;
+import com.vaadin.devrel.featuretour.showcase.flow.EverydayApiView;
 import com.vaadin.devrel.featuretour.showcase.flow.FlowArea;
 import com.vaadin.devrel.featuretour.showcase.flow.LifecycleView;
 import com.vaadin.devrel.featuretour.showcase.flow.MediaView;
 import com.vaadin.devrel.featuretour.showcase.flow.MenusView;
-import com.vaadin.devrel.featuretour.showcase.flow.SmallWinsView;
 import com.vaadin.devrel.featuretour.showcase.flow.RuntimeModulesView;
 import com.vaadin.devrel.featuretour.showcase.flow.StylingView;
 import com.vaadin.devrel.featuretour.showcase.home.HomeView;
@@ -44,7 +44,7 @@ class AllViewsSmokeTest extends SpringBrowserlessTest {
     @ValueSource(classes = {HomeView.class,
             SecurityArea.class, StrictCspView.class, DeclaredJsView.class,
             FlowArea.class, MediaView.class, DownloadsView.class, MenusView.class, LifecycleView.class,
-            StylingView.class, RuntimeModulesView.class, SmallWinsView.class,
+            StylingView.class, RuntimeModulesView.class, EverydayApiView.class,
             ComponentsArea.class, PdfViewerView.class, LabelsAsideView.class, MultiSelectView.class,
             TextSelectionView.class, ButtonView.class, GridView.class, NowStableView.class, AccessibilityView.class,
             AiArea.class, AiGridView.class,

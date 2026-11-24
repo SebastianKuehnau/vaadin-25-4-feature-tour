@@ -25,11 +25,11 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-@Route("small-api-wins")
-@PageTitle("Small API Wins")
-@Menu(title = "Small API Wins", parent = FlowArea.class, order = 7)
-@ShowcaseInfo(summary = "Null-safe converters, findAncestor(predicate), browser time zone, URLs with query parameters.", tiers = Tier.FREE)
-public class SmallWinsView extends ShowcasePage {
+@Route("everyday-api-upgrades")
+@PageTitle("Everyday API Upgrades")
+@Menu(title = "Everyday API Upgrades", parent = FlowArea.class, order = 7)
+@ShowcaseInfo(summary = "Typed browser time zone, null-safe converters, findAncestor(predicate), URLs with query parameters.", tiers = Tier.FREE)
+public class EverydayApiView extends ShowcasePage {
 
     /** A bean with an optional date. */
     public static class Person {
@@ -50,14 +50,15 @@ public class SmallWinsView extends ShowcasePage {
     final Span ancestor = new Span();
     final Span url = new Span();
 
-    public SmallWinsView() {
-        super("Small API Wins",
-                "Small additions that remove boilerplate you have probably written yourself.",
+    public EverydayApiView() {
+        super("Everyday API Upgrades",
+                "Typed, null-safe APIs for things almost every app does: time zones, optional values, "
+                        + "component trees and links. Helper code you used to write yourself is no longer needed.",
                 "https://vaadin.com/docs/next/flow/binding-data/components-binder-validation");
 
+        addTimeZoneDemo();
         addConverterDemo();
         addAncestorDemo();
-        addTimeZoneDemo();
         addUrlDemo();
     }
 
@@ -124,8 +125,9 @@ public class SmallWinsView extends ShowcasePage {
                 + details.getBrowserDateTime().format(format) + " · server zone: " + ZoneId.systemDefault());
         zone.addClassName("showcase-status");
         zone.setTestId("time-zone");
-        addDemo("The browser's time zone as a ZoneId",
-                "ExtendedClientDetails now gives you a ZoneId and the browser's local date-time, ready for java.time.",
+        addDemo("The user's time zone as a java.time ZoneId",
+                "Show times in the user's own time zone without parsing a time zone id or calculating with offsets. "
+                        + "ExtendedClientDetails gives you a ZoneId and the browser's ZonedDateTime, ready for java.time.",
                 zone, """
                         ExtendedClientDetails details = UI.getCurrent().getPage().getExtendedClientDetails();
                         ZoneId zone = details.getZoneId();

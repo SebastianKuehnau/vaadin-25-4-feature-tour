@@ -29,7 +29,7 @@ Built with Vaadin Flow 25.4.0-beta2, Spring Boot 4.2 and the Aura theme.
 | | Smarter Grid | Multi-select by row click, `getColumnBySortProperty()`, context menu that knows the clicked column | Free |
 | | Now Stable | Switch and Breadcrumbs without feature flags | Free |
 | | Camera Capture | `UploadButton.setCapture()` opens the phone camera, with an `UploadDropZone` and `UploadFileList` sharing one `UploadManager` | Free |
-| | Accessibility & More | Heading levels (Dialog, Confirm Dialog, Card), Dialog `aria-describedby`, `findTabContaining()`, `Notification.getText()`, Slider variants | Free |
+| | Component Polish | Heading levels (Dialog, Confirm Dialog, Card), Dialog `aria-describedby`, `findTabContaining()`, `Notification.getText()`, Slider variants | Free |
 | AI | AI Grid Paging | `GridAIController` paging through `DatabaseProvider.executeQuery(sql, QueryPage)` and `count(sql)`, `submitDisabled` | Commercial, preview |
 | Tooling | Copilot 25.4 | Guided page: Browserless tests from the recorder, Kotlin views, auto-responsive Form Layout, Component Gallery, drilldown, optimistic updates | – |
 | | Under the Hood | Hilla TypeScript in Java, leaner `vaadin-spring`, Node.js 26, Spring Boot 4.2, CDI/Quarkus versioning, breaking changes | – |

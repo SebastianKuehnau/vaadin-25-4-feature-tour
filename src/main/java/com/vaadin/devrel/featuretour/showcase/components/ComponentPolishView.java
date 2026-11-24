@@ -21,11 +21,11 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
-@Route("accessibility-and-more")
-@PageTitle("Accessibility & More")
-@Menu(title = "Accessibility & More", parent = ComponentsArea.class, order = 9)
+@Route("component-polish")
+@PageTitle("Component Polish")
+@Menu(title = "Component Polish", parent = ComponentsArea.class, order = 9)
 @ShowcaseInfo(summary = "Heading levels, aria-describedby, findTabContaining(), Notification.getText(), Slider variants.", tiers = Tier.FREE)
-public class AccessibilityView extends ShowcasePage {
+public class ComponentPolishView extends ShowcasePage {
 
     final Dialog dialog = new Dialog();
     final TabSheet tabs = new TabSheet();
@@ -33,8 +33,8 @@ public class AccessibilityView extends ShowcasePage {
     final Span tabStatus = new Span();
     final Span notificationText = new Span();
 
-    public AccessibilityView() {
-        super("Accessibility & More",
+    public ComponentPolishView() {
+        super("Component Polish",
                 "Heading levels and descriptions for screen reader users, jumping to the tab that holds an invalid field, "
                         + "reading a notification's text and new Slider variants.",
                 "https://vaadin.com/docs/next/components/dialog");

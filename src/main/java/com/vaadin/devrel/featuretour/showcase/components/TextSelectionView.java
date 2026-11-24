@@ -7,6 +7,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
@@ -50,7 +51,7 @@ public class TextSelectionView extends ShowcasePage {
         addDemo("Point at the invalid part after validation",
                 "Press Save: the validator finds where the value stops matching and selects the rest, so the user "
                         + "sees exactly what to fix and can type over it.",
-                new VerticalLayout(new FlexLayout(version, save), result), """
+                new VerticalLayout(new HorizontalLayout(version, save) {{ setAlignItems(Alignment.BASELINE); }}, result), """
                         int bad = firstInvalidIndex(version.getValue());
                         if (bad >= 0) {
                             version.setInvalid(true);

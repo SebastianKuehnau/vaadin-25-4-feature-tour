@@ -17,9 +17,9 @@ import com.vaadin.flow.router.Route;
 
 import java.util.List;
 
-@Route("grid")
-@PageTitle("Grid")
-@Menu(title = "Grid", parent = ComponentsArea.class, order = 6)
+@Route("smarter-grid")
+@PageTitle("Smarter Grid")
+@Menu(title = "Smarter Grid", parent = ComponentsArea.class, order = 6)
 @ShowcaseInfo(summary = "Row click in multi-select, getColumnBySortProperty(), column-aware context menus.", tiers = Tier.FREE)
 public class GridView extends ShowcasePage {
 
@@ -42,9 +42,9 @@ public class GridView extends ShowcasePage {
     final Span lastAction = new Span("Right-click a cell.");
 
     public GridView() {
-        super("Grid",
-                "Three small improvements: selecting rows by clicking them in multi-select mode, looking up a column by "
-                        + "its sort property, and context menus that know the clicked column.",
+        super("Smarter Grid",
+                "Multi-select by clicking anywhere on a row, not just the checkbox. Find a column by its sort property, "
+                        + "and build context menus that know which column was clicked.",
                 "https://vaadin.com/docs/next/components/grid");
 
         addRowClickDemo();

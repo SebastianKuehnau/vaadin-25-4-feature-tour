@@ -13,9 +13,9 @@ import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
-@Route("button")
-@PageTitle("Button")
-@Menu(title = "Button", parent = ComponentsArea.class, order = 5)
+@Route("double-click-protection")
+@PageTitle("Double-Click Protection")
+@Menu(title = "Double-Click Protection", parent = ComponentsArea.class, order = 5)
 @ShowcaseInfo(summary = "DisableOnClickMode.UNTIL_RESPONSE re-enables the button when the server is done.", tiers = Tier.FREE)
 public class ButtonView extends ShowcasePage {
 
@@ -32,7 +32,7 @@ public class ButtonView extends ShowcasePage {
     int responseSaves;
 
     public ButtonView() {
-        super("Button",
+        super("Double-Click Protection",
                 "DisableOnClickMode.UNTIL_RESPONSE disables the button on click and enables it again automatically "
                         + "with the next response, once the click listeners have run. Each listener here takes 2 seconds.",
                 "https://vaadin.com/docs/next/components/button");

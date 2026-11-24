@@ -25,8 +25,8 @@ Built with Vaadin Flow 25.4.0-beta2, Spring Boot 4.2 and the Aura theme.
 | | Forms: Labels Aside | `LABEL_ASIDE` on eight field types, `FormLayout.setLabelTextAlign()` | Free |
 | | Multi-Select Combo Box | Select All / Select Filtered, hidden with lazy data | Free |
 | | Text Selection | `setSelectionRange()` on the invalid part after validation, `selectAll()`, `setCursorPosition()` | Free |
-| | Button | `DisableOnClickMode.UNTIL_RESPONSE` vs. no protection vs. `setDisableOnClick(true)`, with a 2 s listener | Free |
-| | Grid | Multi-select by row click, `getColumnBySortProperty()`, context menu that knows the clicked column | Free |
+| | Double-Click Protection | `DisableOnClickMode.UNTIL_RESPONSE` vs. no protection vs. `setDisableOnClick(true)`, with a 2 s listener | Free |
+| | Smarter Grid | Multi-select by row click, `getColumnBySortProperty()`, context menu that knows the clicked column | Free |
 | | Now Stable | Switch and Breadcrumbs without feature flags | Free |
 | | Accessibility & More | Heading levels (Dialog, Confirm Dialog, Card), Dialog `aria-describedby`, camera capture, `findTabContaining()`, `Notification.getText()`, Slider variants | Free |
 | AI | AI Grid Paging | `GridAIController` paging through `DatabaseProvider.executeQuery(sql, QueryPage)` and `count(sql)`, `submitDisabled` | Commercial, preview |

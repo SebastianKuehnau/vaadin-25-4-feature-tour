@@ -17,28 +17,17 @@ import com.vaadin.flow.component.slider.SliderVariant;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.UploadButton;
-import com.vaadin.flow.component.upload.UploadCapture;
-import com.vaadin.flow.component.upload.UploadDropZone;
-import com.vaadin.flow.component.upload.UploadFileList;
-import com.vaadin.flow.component.upload.UploadManager;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.streams.UploadHandler;
 
 @Route("accessibility-and-more")
 @PageTitle("Accessibility & More")
-@Menu(title = "Accessibility & More", parent = ComponentsArea.class, order = 8)
-@ShowcaseInfo(summary = "Heading levels, aria-describedby, camera capture, findTabContaining(), Slider variants.", tiers = Tier.FREE)
+@Menu(title = "Accessibility & More", parent = ComponentsArea.class, order = 9)
+@ShowcaseInfo(summary = "Heading levels, aria-describedby, findTabContaining(), Notification.getText(), Slider variants.", tiers = Tier.FREE)
 public class AccessibilityView extends ShowcasePage {
 
     final Dialog dialog = new Dialog();
-    final Span uploadStatus = new Span("No photo yet.");
-    final UploadManager uploads = new UploadManager(this);
-    final UploadButton camera = new UploadButton("Take a photo", uploads);
-    final UploadFileList files = new UploadFileList(uploads);
-    final UploadDropZone dropZone = new UploadDropZone(new Span("…or drop photos here"), uploads);
     final TabSheet tabs = new TabSheet();
     final TextField email = new TextField("Email");
     final Span tabStatus = new Span();
@@ -46,11 +35,11 @@ public class AccessibilityView extends ShowcasePage {
 
     public AccessibilityView() {
         super("Accessibility & More",
-                "Smaller improvements across the components, many of them for screen reader users.",
+                "Heading levels and descriptions for screen reader users, jumping to the tab that holds an invalid field, "
+                        + "reading a notification's text and new Slider variants.",
                 "https://vaadin.com/docs/next/components/dialog");
 
         addHeadingDemo();
-        addCaptureDemo();
         addTabSheetDemo();
         addNotificationDemo();
         addSliderDemo();
@@ -89,40 +78,6 @@ public class AccessibilityView extends ShowcasePage {
 
                         confirmDialog.setHeadingLevel(2);
                         card.setHeadingLevel(3);
-                        """);
-    }
-
-    private void addCaptureDemo() {
-        uploads.setUploadHandler(UploadHandler.inMemory((metadata, data) -> uploadStatus.setText(
-                "✅ Received " + metadata.fileName() + " (" + data.length + " bytes)"))
-                .whenComplete(ok -> {
-                    if (!ok) {
-                        uploadStatus.setText("❌ Upload failed");
-                    }
-                }));
-        uploads.addFileRemovedListener(e -> uploadStatus.setText("Removed " + e.getFileName()));
-        uploads.setAcceptedMimeTypes("image/*");
-        uploads.setMaxFiles(3);
-        camera.setCapture(UploadCapture.ENVIRONMENT);
-        camera.setTestId("camera");
-        files.setTestId("files");
-        dropZone.setTestId("drop-zone");
-        dropZone.addClassName("drop-zone");
-        uploadStatus.addClassName("showcase-status");
-        uploadStatus.setTestId("upload-status");
-
-        addDemo("Upload: camera capture",
-                "On phones, the button opens the camera directly: ENVIRONMENT for the back camera, USER for the front. "
-                        + "On desktop it opens the normal file dialog.",
-                new VerticalLayout(camera, dropZone, files, uploadStatus), """
-                        UploadManager uploads = new UploadManager(this,
-                                UploadHandler.inMemory((metadata, data) -> save(data)));
-                        uploads.setAcceptedMimeTypes("image/*");
-
-                        UploadButton camera = new UploadButton("Take a photo", uploads);
-                        camera.setCapture(UploadCapture.ENVIRONMENT);
-                        UploadDropZone dropZone = new UploadDropZone(new Span("…or drop photos here"), uploads);
-                        UploadFileList files = new UploadFileList(uploads);
                         """);
     }
 

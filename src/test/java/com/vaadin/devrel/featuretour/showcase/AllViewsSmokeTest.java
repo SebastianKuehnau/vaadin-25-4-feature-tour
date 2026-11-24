@@ -5,6 +5,7 @@ import com.vaadin.devrel.featuretour.showcase.ai.AiArea;
 import com.vaadin.devrel.featuretour.showcase.ai.AiGridView;
 import com.vaadin.devrel.featuretour.showcase.components.AccessibilityView;
 import com.vaadin.devrel.featuretour.showcase.components.ButtonView;
+import com.vaadin.devrel.featuretour.showcase.components.CameraCaptureView;
 import com.vaadin.devrel.featuretour.showcase.components.ComponentsArea;
 import com.vaadin.devrel.featuretour.showcase.components.GridView;
 import com.vaadin.devrel.featuretour.showcase.components.LabelsAsideView;
@@ -46,7 +47,7 @@ class AllViewsSmokeTest extends SpringBrowserlessTest {
             FlowArea.class, MediaView.class, DownloadsView.class, MenusView.class, LifecycleView.class,
             StylingView.class, RuntimeModulesView.class, EverydayApiView.class,
             ComponentsArea.class, PdfViewerView.class, LabelsAsideView.class, MultiSelectView.class,
-            TextSelectionView.class, ButtonView.class, GridView.class, NowStableView.class, AccessibilityView.class,
+            TextSelectionView.class, ButtonView.class, GridView.class, NowStableView.class, CameraCaptureView.class, AccessibilityView.class,
             AiArea.class, AiGridView.class,
             ToolingArea.class, CopilotView.class, UnderTheHoodView.class})
     void page_opens(Class<? extends Component> view) {

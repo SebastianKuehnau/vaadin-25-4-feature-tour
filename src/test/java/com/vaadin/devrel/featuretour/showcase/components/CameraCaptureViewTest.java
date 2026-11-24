@@ -14,14 +14,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-class AccessibilityUploadTest extends SpringBrowserlessTest {
+class CameraCaptureViewTest extends SpringBrowserlessTest {
 
-    AccessibilityView view;
+    CameraCaptureView view;
     UploadButton camera;
 
     @BeforeEach
     void open() {
-        view = navigate(AccessibilityView.class);
+        view = navigate(CameraCaptureView.class);
         camera = $(UploadButton.class).testId("camera");
     }
 

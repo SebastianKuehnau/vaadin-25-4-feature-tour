@@ -2,7 +2,7 @@ package com.vaadin.devrel.featuretour.showcase.flow;
 
 import com.vaadin.browserless.SpringBrowserlessTest;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Table;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -21,7 +21,7 @@ class LifecycleViewTest extends SpringBrowserlessTest {
         Thread.sleep(1500);
         roundTrip();
 
-        String log = $(Div.class).testId("lifecycle-events").getElement().getTextRecursively();
+        String log = $(Table.class).testId("lifecycle-events").getElement().getTextRecursively();
         assertThat(log).contains("Navigation started", "/lifecycle-events?step=1", "UI_NAVIGATE",
                 "completed → LifecycleView");
     }
@@ -36,7 +36,7 @@ class LifecycleViewTest extends SpringBrowserlessTest {
 
         // The recorder keeps the log per session, so the navigation from before
         // the reload is still there, next to the one the reload caused
-        String log = $(Div.class).testId("lifecycle-events").getElement().getTextRecursively();
+        String log = $(Table.class).testId("lifecycle-events").getElement().getTextRecursively();
         assertThat(log.split("completed → LifecycleView", -1)).hasSize(3);
         assertThat(log).contains("UI_NAVIGATE", "PROGRAMMATIC");
     }

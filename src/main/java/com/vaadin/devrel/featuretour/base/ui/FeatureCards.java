@@ -15,21 +15,19 @@ public final class FeatureCards extends Div {
 
     public FeatureCards(Collection<MenuEntry> entries) {
         addClassName("card-grid");
-        for (MenuEntry entry : entries) {
-            var card = new Card();
-            card.setTitle(new RouterLink(entry.title(), entry.menuClass()));
+        entries.forEach(entry -> add(new FeatureCard(entry)));
+    }
+
+    /** Links to a page, with its summary and tiers when it has them. */
+    static class FeatureCard extends Card {
+        FeatureCard(MenuEntry entry) {
+            setTitle(new RouterLink(entry.title(), entry.menuClass()));
             var info = entry.menuClass() == null ? null : entry.menuClass().getAnnotation(ShowcaseInfo.class);
             if (info != null) {
-                card.setSubtitle(info.summary());
-                var badges = new Div();
-                badges.addClassName("showcase-badges");
-                for (Tier tier : info.tiers()) {
-                    badges.add(tier.badge());
-                }
-                card.add(badges);
+                setSubtitle(info.summary());
+                add(new TierBadges(info.tiers()));
             }
-            card.addClassName("feature-card");
-            add(card);
+            addClassName("feature-card");
         }
     }
 }

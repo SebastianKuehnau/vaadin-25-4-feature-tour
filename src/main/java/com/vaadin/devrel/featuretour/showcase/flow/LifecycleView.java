@@ -3,15 +3,16 @@ package com.vaadin.devrel.featuretour.showcase.flow;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.StatTile;
+import com.vaadin.devrel.featuretour.base.ui.StatusText;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
 import com.vaadin.devrel.featuretour.showcase.home.HomeView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.Table;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.js.JsDefinition;
 import com.vaadin.flow.js.JsExpression;
@@ -26,6 +27,7 @@ import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.signals.local.ValueSignal;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -67,9 +69,8 @@ public class LifecycleView extends ShowcasePage implements BeforeLeaveObserver {
 
     private final LifecycleRecorder recorder;
     final ValueSignal<LifecycleRecorder.Stats> stats = new ValueSignal<>(LifecycleRecorder.Stats.EMPTY);
-    final Div events = new Div();
-    private String shownFirst = "";
-    final Span browser = new Span("Browser: waiting for the first request…");
+    final EventTable events = new EventTable();
+    final StatusText browser = new StatusText("round-trip", "Browser: waiting for the first request…");
     final Checkbox postpone = new Checkbox("Postpone the next navigation away from this page");
     private int step;
 
@@ -103,44 +104,65 @@ public class LifecycleView extends ShowcasePage implements BeforeLeaveObserver {
     void refresh(UI ui) {
         var current = recorder.get(ui.getSession().getSession());
         stats.set(current.stats());
-        var recent = current.recent();
-        String first = recent.isEmpty() ? "" : recent.getFirst().toString();
-        if (!first.equals(shownFirst)) {
-            // Plain DOM instead of a Grid: a Grid acknowledges each update with a
-            // request of its own, which would show up here and refresh again
+        events.show(current.recent());
+    }
+
+    /**
+     * The latest events of the session. A plain table instead of a Grid: a Grid
+     * acknowledges each update with a request of its own, which would show up
+     * here and refresh again.
+     */
+    static class EventTable extends Table {
+        private String shownFirst = "";
+
+        EventTable() {
+            addClassName("lifecycle-log");
+            setTestId("lifecycle-events");
+            addHeaderRow("Time", "Event", "Handler / location", "Outcome", "Duration");
+        }
+
+        void show(List<LifecycleRecorder.Entry> recent) {
+            String first = recent.isEmpty() ? "" : recent.getFirst().toString();
+            if (first.equals(shownFirst)) {
+                return;
+            }
             shownFirst = first;
-            events.removeAll();
-            events.add(line("Time", "Event", "Handler / location", "Outcome", "Duration"));
-            recent.stream().limit(25).forEach(e -> events.add(line(e.time(), e.type(), e.detail(), e.outcome(),
-                    e.millis() == 0 ? "" : String.format("%.2f ms", e.millis()))));
+            getBody().removeAll();
+            recent.stream().limit(25).forEach(e -> addRow(e.time(), e.type(), e.detail(), e.outcome(),
+                    e.millis() == 0 ? "" : String.format("%.2f ms", e.millis())));
+        }
+    }
+
+    /** Request and navigation counters, refreshed from a signal. */
+    static class StatTiles extends FlexLayout {
+        StatTiles(ValueSignal<LifecycleRecorder.Stats> stats) {
+            add(new StatTile("Requests started / ended",
+                            () -> stats.get().requestsStarted() + " / " + stats.get().requestsEnded()),
+                    new StatTile("Avg. request", () -> String.format("%.2f ms", stats.get().avgRequestMs())),
+                    new StatTile("Navigations", () -> String.valueOf(stats.get().navigations())),
+                    new StatTile("Avg. navigation", () -> String.format("%.2f ms", stats.get().avgNavigationMs())),
+                    new StatTile("RPC invocations", () -> String.valueOf(stats.get().rpcCalls())));
+            addClassName("stat-tiles");
         }
     }
 
     private void addDashboard() {
-        var tiles = new FlexLayout(
-                new StatTile("Requests started / ended", () -> stats.get().requestsStarted() + " / " + stats.get().requestsEnded()),
-                new StatTile("Avg. request", () -> String.format("%.2f ms", stats.get().avgRequestMs())),
-                new StatTile("Navigations", () -> String.valueOf(stats.get().navigations())),
-                new StatTile("Avg. navigation", () -> String.format("%.2f ms", stats.get().avgNavigationMs())),
-                new StatTile("RPC invocations", () -> String.valueOf(stats.get().rpcCalls())));
-        tiles.addClassName("stat-tiles");
-
-        events.addClassName("lifecycle-log");
-        events.setTestId("lifecycle-events");
-
+        var scroller = new Scroller(events);
+        scroller.setMaxHeight("22rem");
+        scroller.setWidthFull();
         addDemo("Your session, live",
                 "A VaadinServiceInitListener records the events of every session from startup, so this dashboard also "
                         + "shows navigations that left this page. The first request of a page load starts before there is a session, "
                         + "so it is counted when it ends but not when it starts.",
-                new VerticalLayout(tiles, events), """
+                new VerticalLayout(new StatTiles(stats), scroller), """
                         @Component
                         public class LifecycleRecorder implements VaadinServiceInitListener {
                             public void serviceInit(ServiceInitEvent event) {
                                 var bus = event.getSource().getEventBus();
-                                bus.addListener(RequestEndedEvent.class, e -> record(
+                                bus.addListener(**RequestEndedEvent**.class, e -> record(
                                         e.getHandler(), e.getDuration(), e.getFailure()));
-                                bus.addListener(NavigationStartedEvent.class, e -> started(e.getUI()));
-                                bus.addListener(NavigationEndedEvent.class, e -> record(
+                                bus.addListener(**NavigationStartedEvent**.class, e -> started(e.getUI()));
+                                bus.addListener(**NavigationEndedEvent**.class, e -> record(
                                         switch (e.getOutcome()) {
                                             case Completed c -> "completed → " + c.navigationTarget().getSimpleName();
                                             case Postponed p -> "postponed";
@@ -150,15 +172,6 @@ public class LifecycleView extends ShowcasePage implements BeforeLeaveObserver {
                             }
                         }
                         """);
-    }
-
-    private static Div line(String... cells) {
-        var line = new Div();
-        for (String cell : cells) {
-            line.add(new Span(cell));
-        }
-        line.addClassName("lifecycle-line");
-        return line;
     }
 
     private void addPlayground() {
@@ -178,20 +191,18 @@ public class LifecycleView extends ShowcasePage implements BeforeLeaveObserver {
     }
 
     private void addBrowserDemo() {
-        browser.addClassName("showcase-status");
-        browser.setTestId("round-trip");
         addDemo("Round trips, measured in the browser",
                 "window.Vaadin.Flow.clients[appId].events fires vaadin-request and vaadin-server-message. The script is a "
                         + "@JsDefinition, and it writes into the page directly: reporting each round trip to the server "
                         + "would cause another round trip.",
                 browser, """
-                        client.events.addEventListener('vaadin-request', ({ detail: request }) => {
+                        client.events.addEventListener(**'vaadin-request'**, ({ detail: request }) => {
                           let sentAt;
                           request.addEventListener('sent', () => sentAt = performance.now());
                           request.addEventListener('end', () =>
                               show(performance.now() - sentAt, request.outcome)); // acknowledged | rejected | discarded
                         });
-                        client.events.addEventListener('vaadin-server-message', () => messages++);
+                        client.events.addEventListener(**'vaadin-server-message'**, () => messages++);
                         """);
     }
 

@@ -34,15 +34,15 @@ public class RuntimeModulesView extends ShowcasePage {
                         + "type = MODULE loads it as <script type=\"module\"> at runtime, so it does not go through Vite. "
                         + "Use @JsModule for files that should be bundled.",
                 clock, """
-                        @JavaScript(value = "js/tour-clock.js", type = JavaScript.Type.MODULE)
+                        @JavaScript(value = "js/tour-clock.js", **type = JavaScript.Type.MODULE**)
                         public class RuntimeModulesView extends ShowcasePage { ... }
 
                         @Tag("tour-clock")
                         public static class TourClock extends Component { }
 
                         // Or programmatically, e.g. from a CDN:
-                        UI.getCurrentOrThrow().getPage().addJavaScript(
-                                "https://unpkg.com/lodash@4.17.15", LoadMode.EAGER, JavaScript.Type.MODULE);
+                        UI.getCurrentOrThrow().getPage().**addJavaScript(
+                                "https://unpkg.com/lodash@4.17.15", LoadMode.EAGER, JavaScript.Type.MODULE)**;
                         """);
     }
 }

@@ -17,8 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LabelsAsideViewTest extends SpringBrowserlessTest {
 
     private static List<HasTheme> fields(LabelsAsideView view) {
-        return List.of(view.name, view.country, view.start, view.time, view.role, view.topics, view.level,
-                view.experience);
+        var f = view.fields;
+        return List.of(f.name, f.country, f.start, f.time, f.role, f.topics, f.level, f.experience);
     }
 
     @Test

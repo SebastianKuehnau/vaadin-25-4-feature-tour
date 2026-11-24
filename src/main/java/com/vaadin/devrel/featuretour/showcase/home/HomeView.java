@@ -1,8 +1,7 @@
 package com.vaadin.devrel.featuretour.showcase.home;
 
+import com.vaadin.devrel.featuretour.base.ui.ExternalLink;
 import com.vaadin.devrel.featuretour.base.ui.FeatureCards;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -23,28 +22,37 @@ public class HomeView extends VerticalLayout {
 
     public HomeView() {
         addClassName("home-view");
-
-        var eyebrow = new Span("Beta 2 · Curated by Vaadin DevRel");
-        eyebrow.addClassName("home-eyebrow");
-        var title = new H1("What's new in Vaadin 25.4");
-        var lead = new Paragraph("A hands-on tour of the release: security, framework APIs, "
-                + "components, AI and tooling. Every page is a live demo with the Java code behind it.");
-        var releaseNotes = new Anchor("https://github.com/vaadin/platform/releases/tag/25.4.0-beta2", "Release notes");
-        releaseNotes.setTarget(AnchorTarget.BLANK);
-        var docs = new Anchor("https://vaadin.com/docs/next", "Docs for the next release");
-        docs.setTarget(AnchorTarget.BLANK);
-        var links = new HorizontalLayout(releaseNotes, docs);
-        var hero = new Div(eyebrow, title, lead, links);
-        hero.addClassName("home-hero");
-        add(hero);
-
+        add(new Hero());
         // One section per area, built from the same menu tree as the side nav
         for (MenuEntry area : MenuConfiguration.getMenuEntriesTree()) {
             if (!area.children().isEmpty()) {
-                var section = new Div(new H2(area.title()), new FeatureCards(area.children()));
-                section.addClassName("home-section");
-                add(section);
+                add(new AreaSection(area));
             }
+        }
+    }
+
+    /** Title, lead text and links to the release notes and docs. */
+    static class Hero extends Div {
+        Hero() {
+            var eyebrow = new Span("Beta 2 · Curated by Vaadin DevRel");
+            eyebrow.addClassName("home-eyebrow");
+            add(eyebrow,
+                    new H1("What's new in Vaadin 25.4"),
+                    new Paragraph("A hands-on tour of the release: security, framework APIs, components, AI and "
+                            + "tooling. Every page is a live demo with the Java code behind it."),
+                    new HorizontalLayout(
+                            new ExternalLink("https://github.com/vaadin/platform/releases/tag/25.4.0-beta2",
+                                    "Release notes"),
+                            new ExternalLink("https://vaadin.com/docs/next", "Docs for the next release")));
+            addClassName("home-hero");
+        }
+    }
+
+    /** The pages of one area as cards. */
+    static class AreaSection extends Div {
+        AreaSection(MenuEntry area) {
+            super(new H2(area.title()), new FeatureCards(area.children()));
+            addClassName("home-section");
         }
     }
 }

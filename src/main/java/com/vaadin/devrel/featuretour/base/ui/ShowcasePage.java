@@ -2,15 +2,11 @@ package com.vaadin.devrel.featuretour.base.ui;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Section;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 /**
@@ -24,22 +20,50 @@ public abstract class ShowcasePage extends VerticalLayout {
         addClassName("showcase-page");
         setPadding(true);
         setSpacing(false);
-
-        var badges = new FlexLayout();
-        badges.addClassName("showcase-badges");
         // Without explicit tiers, the badges come from @ShowcaseInfo on the page class
         var info = getClass().getAnnotation(ShowcaseInfo.class);
-        for (Tier tier : tiers.length == 0 && info != null ? info.tiers() : tiers) {
-            badges.add(tier.badge());
+        add(new PageHeader(title, lead, docsUrl, tiers.length == 0 && info != null ? info.tiers() : tiers));
+    }
+
+    /** Tier badges, title, lead text and a documentation link. */
+    static class PageHeader extends Div {
+        PageHeader(String title, String lead, String docsUrl, Tier... tiers) {
+            var docs = new ExternalLink(docsUrl, "Read the docs →");
+            docs.addClassName("showcase-docs");
+            add(new TierBadges(tiers), new H1(title), new Paragraph(lead), docs);
+            addClassName("showcase-header");
         }
+    }
 
-        var docs = new Anchor(docsUrl, "Read the docs →");
-        docs.setTarget(AnchorTarget.BLANK);
-        docs.addClassName("showcase-docs");
+    /** A heading, a short explanation, the live demo and, if given, the code that builds it. */
+    static class DemoSection extends Section {
+        DemoSection(String heading, String description, Component demo, String code) {
+            var demoArea = new Div(demo);
+            demoArea.addClassName("showcase-demo");
+            add(new H2(heading), new Paragraph(description), demoArea);
+            if (!code.isBlank()) {
+                add(new CodeDetails(code));
+            }
+            addClassName("showcase-section");
+        }
+    }
 
-        var header = new Div(badges, new H1(title), new Paragraph(lead), docs);
-        header.addClassName("showcase-header");
-        add(header);
+    /** A collapsed code snippet. */
+    static class CodeDetails extends Details {
+        CodeDetails(String code) {
+            setSummaryText("Show Java code");
+            add(new CodeBlock(code));
+            addClassName("showcase-code-details");
+        }
+    }
+
+    /** A note box. A warning note is for features that are not yet usable in this beta. */
+    static class Note extends Div {
+        Note(String text, boolean warning) {
+            super(new Paragraph(text));
+            addClassName("showcase-note");
+            setClassName("warning", warning);
+        }
     }
 
     /**
@@ -47,18 +71,7 @@ public abstract class ShowcasePage extends VerticalLayout {
      * and the code that builds it.
      */
     protected Section addDemo(String heading, String description, Component demo, String code) {
-        var demoArea = new Div(demo);
-        demoArea.addClassName("showcase-demo");
-
-        var section = new Section(new H2(heading), new Paragraph(description), demoArea);
-        section.addClassName("showcase-section");
-        if (!code.isBlank()) {
-            var pre = new Pre(code.strip());
-            pre.addClassName("showcase-code");
-            var details = new Details("Show Java code", pre);
-            details.addClassName("showcase-code-details");
-            section.add(details);
-        }
+        var section = new DemoSection(heading, description, demo, code);
         add(section);
         return section;
     }
@@ -75,11 +88,7 @@ public abstract class ShowcasePage extends VerticalLayout {
      * usable in this beta.
      */
     protected Div addNote(String text, boolean warning) {
-        var note = new Div(new Paragraph(text));
-        note.addClassName("showcase-note");
-        if (warning) {
-            note.addClassName("warning");
-        }
+        var note = new Note(text, warning);
         add(note);
         return note;
     }

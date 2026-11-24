@@ -2,10 +2,10 @@ package com.vaadin.devrel.featuretour.showcase.components;
 
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
+import com.vaadin.devrel.featuretour.base.ui.StatusText;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -18,7 +18,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
-import java.util.List;
 
 @Route("pdf-viewer")
 @PageTitle("PDF Viewer")
@@ -29,10 +28,6 @@ public class PdfViewerView extends ShowcasePage {
 
     record ZoomOption(String label, Zoom zoom) {
     }
-
-    final PdfViewer fromUrl = new PdfViewer("pdf/cheat-sheet.pdf");
-    final PdfViewer fromHandler = new PdfViewer(
-            DownloadHandler.forClassResource(PdfViewerView.class, "/META-INF/resources/pdf/cheat-sheet.pdf"));
 
     public PdfViewerView() {
         super("PDF Viewer",
@@ -46,71 +41,118 @@ public class PdfViewerView extends ShowcasePage {
         addHandlerDemo();
     }
 
+    /** The cheat sheet, fetched by the browser from a static URL. */
+    static class UrlViewer extends PdfViewer {
+        UrlViewer() {
+            super("pdf/cheat-sheet.pdf");
+            setHeaderTitle("Loaded from a URL");
+            setHeight("480px");
+            setTestId("pdf-url");
+        }
+    }
+
     private void addUrlDemo() {
-        fromUrl.setHeaderTitle("Loaded from a URL");
-        fromUrl.setHeight("480px");
-        fromUrl.setTestId("pdf-url");
         addDemo("From a URL",
                 "The simplest case: a static file served by the app, or any URL the browser can fetch.",
-                fromUrl, """
-                        PdfViewer viewer = new PdfViewer("pdf/cheat-sheet.pdf");
-                        viewer.setHeight("480px");
+                new UrlViewer(), """
+                        class UrlViewer extends PdfViewer {
+                            UrlViewer() {
+                                **super("pdf/cheat-sheet.pdf")**;
+                                setHeaderTitle("Loaded from a URL");
+                                setHeight("480px");
+                            }
+                        }
                         """);
     }
 
+    /** The cheat sheet, served by a DownloadHandler, with a download button and a custom toolbar action. */
+    static class HandlerViewer extends PdfViewer {
+        HandlerViewer() {
+            super(DownloadHandler.forClassResource(PdfViewerView.class, "/META-INF/resources/pdf/cheat-sheet.pdf"));
+            setHeaderTitle("Served by a DownloadHandler");
+            setFileName("vaadin-25-4-cheat-sheet.pdf");
+            setDownloadButtonVisible(true);
+            setHeight("520px");
+            setTestId("pdf-handler");
+            getToolbarActions().add(new BookmarkButton(this));
+        }
+    }
+
+    /** A custom action in the viewer's own toolbar. */
+    static class BookmarkButton extends Button {
+        BookmarkButton(PdfViewer viewer) {
+            super(VaadinIcon.BOOKMARK_O.create(), e -> Notification.show("Bookmarked page " + viewer.getPage()));
+            addThemeVariants(ButtonVariant.TERTIARY);
+            setAriaLabel("Bookmark this page");
+            setTestId("pdf-bookmark");
+        }
+    }
+
+    /** Sets the zoom of a viewer. */
+    static class ZoomSelect extends Select<ZoomOption> {
+        ZoomSelect(PdfViewer viewer) {
+            super("Zoom", e -> viewer.setZoom(e.getValue().zoom()),
+                    new ZoomOption("Fit page", Zoom.PAGE_FIT), new ZoomOption("Page width", Zoom.PAGE_WIDTH),
+                    new ZoomOption("50 %", Zoom.of(0.5)), new ZoomOption("100 %", Zoom.of(1)),
+                    new ZoomOption("150 %", Zoom.of(1.5)));
+            setItemLabelGenerator(ZoomOption::label);
+            setPlaceholder("Default");
+            setWidth("10rem");
+        }
+    }
+
+    /** Page navigation and zoom from the server. The page label follows the viewer's signals. */
+    static class PageControls extends FlexLayout {
+        PageControls(PdfViewer viewer) {
+            var previous = new Button("Previous", VaadinIcon.ARROW_LEFT.create(),
+                    e -> viewer.scrollToPage(Math.max(1, viewer.getPage() - 1)));
+            var next = new Button("Next", VaadinIcon.ARROW_RIGHT.create(),
+                    e -> viewer.scrollToPage(Math.min(viewer.getPageCount(), viewer.getPage() + 1)));
+            next.setTestId("pdf-next");
+            var page = new StatusText("pdf-page");
+            page.bindText(() -> "Page " + viewer.pageSignal().get() + " of " + viewer.pageCountSignal().get());
+            add(previous, next, page, new ZoomSelect(viewer));
+            addClassName("showcase-row");
+        }
+    }
+
     private void addHandlerDemo() {
-        fromHandler.setHeaderTitle("Served by a DownloadHandler");
-        fromHandler.setFileName("vaadin-25-4-cheat-sheet.pdf");
-        fromHandler.setDownloadButtonVisible(true);
-        fromHandler.setHeight("520px");
-        fromHandler.setTestId("pdf-handler");
-
-        // A custom action in the viewer's own toolbar
-        var bookmark = new Button(VaadinIcon.BOOKMARK_O.create(),
-                e -> Notification.show("Bookmarked page " + fromHandler.getPage()));
-        bookmark.addThemeVariants(ButtonVariant.TERTIARY);
-        bookmark.setAriaLabel("Bookmark this page");
-        bookmark.setTestId("pdf-bookmark");
-        fromHandler.getToolbarActions().add(bookmark);
-
-        // Page navigation from the server, with the state as signals
-        var previous = new Button("Previous", VaadinIcon.ARROW_LEFT.create(),
-                e -> fromHandler.scrollToPage(Math.max(1, fromHandler.getPage() - 1)));
-        var next = new Button("Next", VaadinIcon.ARROW_RIGHT.create(),
-                e -> fromHandler.scrollToPage(Math.min(fromHandler.getPageCount(), fromHandler.getPage() + 1)));
-        next.setTestId("pdf-next");
-        var page = new Span();
-        page.setTestId("pdf-page");
-        page.addClassName("showcase-status");
-        page.bindText(() -> "Page " + fromHandler.pageSignal().get() + " of " + fromHandler.pageCountSignal().get());
-
-        var zoom = new Select<ZoomOption>();
-        zoom.setLabel("Zoom");
-        zoom.setItems(List.of(new ZoomOption("Fit page", Zoom.PAGE_FIT), new ZoomOption("Page width", Zoom.PAGE_WIDTH),
-                new ZoomOption("50 %", Zoom.of(0.5)), new ZoomOption("100 %", Zoom.of(1)),
-                new ZoomOption("150 %", Zoom.of(1.5))));
-        zoom.setItemLabelGenerator(ZoomOption::label);
-        zoom.addValueChangeListener(e -> fromHandler.setZoom(e.getValue().zoom()));
-        zoom.setPlaceholder("Default");
-        zoom.setWidth("10rem");
-
-        var controls = new FlexLayout(previous, next, page, zoom);
-        controls.addClassName("showcase-row");
+        var viewer = new HandlerViewer();
         addDemo("From a DownloadHandler, controlled from Java",
                 "Page and page count are signals, so the label follows the viewer. The bookmark icon at the end of the "
                         + "viewer's toolbar is a regular Button added with getToolbarActions().",
-                new VerticalLayout(controls, fromHandler), """
-                        PdfViewer viewer = new PdfViewer(DownloadHandler.forClassResource(..., "cheat-sheet.pdf"));
-                        viewer.setFileName("vaadin-25-4-cheat-sheet.pdf");
-                        viewer.setDownloadButtonVisible(true);
+                new VerticalLayout(new PageControls(viewer), viewer), """
+                        class HandlerViewer extends PdfViewer {
+                            HandlerViewer() {
+                                **super(DownloadHandler.forClassResource(PdfViewerView.class, "/META-INF/resources/pdf/cheat-sheet.pdf"))**;
+                                setFileName("vaadin-25-4-cheat-sheet.pdf");
+                                setDownloadButtonVisible(true);
+                                **getToolbarActions()**.add(new BookmarkButton(this));
+                            }
+                        }
 
-                        viewer.getToolbarActions().add(new Button(VaadinIcon.BOOKMARK_O.create(),
-                                e -> Notification.show("Bookmarked page " + viewer.getPage())));
+                        class BookmarkButton extends Button {
+                            BookmarkButton(PdfViewer viewer) {
+                                super(VaadinIcon.BOOKMARK_O.create(), e -> Notification.show("Bookmarked page " + viewer.**getPage()**));
+                                setAriaLabel("Bookmark this page");
+                            }
+                        }
 
-                        next.addClickListener(e -> viewer.scrollToPage(viewer.getPage() + 1));
-                        label.bindText(() -> "Page " + viewer.pageSignal().get()
-                                + " of " + viewer.pageCountSignal().get());
-                        viewer.setZoom(Zoom.PAGE_WIDTH); // or Zoom.of(1.5)
+                        class PageControls extends FlexLayout {
+                            PageControls(PdfViewer viewer) {
+                                var next = new Button("Next", e -> viewer.**scrollToPage**(viewer.getPage() + 1));
+                                var page = new StatusText("pdf-page");
+                                page.bindText(() -> "Page " + viewer.**pageSignal()**.get() + " of " + viewer.**pageCountSignal()**.get());
+                                add(previous, next, page, new ZoomSelect(viewer));
+                            }
+                        }
+
+                        class ZoomSelect extends Select<ZoomOption> {
+                            ZoomSelect(PdfViewer viewer) {
+                                super("Zoom", e -> viewer.**setZoom**(e.getValue().zoom()),
+                                        new ZoomOption("Page width", **Zoom.PAGE_WIDTH**), new ZoomOption("150 %", **Zoom.of(1.5)**));
+                            }
+                        }
                         """);
     }
 }

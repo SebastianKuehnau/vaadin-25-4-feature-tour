@@ -24,7 +24,7 @@ public class CopilotView extends ShowcasePage {
                         "The recorder now writes Browserless tests in addition to TestBench tests, and records whether "
                                 + "components are enabled or disabled.",
                         "Open Copilot, go to Features and enable the UI test recorder (an experimental plugin).",
-                        "Start recording, then use a page: try the Button page and click Save (UNTIL_RESPONSE).",
+                        "Start recording, then use a page: try the Double-Click Protection page and click Save (UNTIL_RESPONSE).",
                         "Stop recording and choose Browserless as the output.",
                         "Copy the test to src/test/java and run ./mvnw test.")
                 .card("Kotlin views",
@@ -43,12 +43,12 @@ public class CopilotView extends ShowcasePage {
                 .card("CMD/CTRL drilldown",
                         "Hold CMD (macOS) or CTRL while hovering to drill down and select nested components. Copilot also "
                                 + "handles components that your code adds implicitly.",
-                        "On the Grid page, hold CMD/CTRL and hover the grid to reach a single column.")
+                        "On the Smarter Grid page, hold CMD/CTRL and hover the grid to reach a single column.")
                 .card("Optimistic updates (experimental)",
                         "Edits show up immediately, before the server confirms them. Enable it among Copilot's "
                                 + "experimental features.",
                         "Enable optimistic updates under Features.",
-                        "Change a button text on the Button page and watch it update instantly.")
+                        "Change a button text on the Double-Click Protection page and watch it update instantly.")
                 .card("New onboarding and sign-in",
                         "A redesigned onboarding flow and sign-in dialog let you sign in through the license checker, and "
                                 + "a menu indicator shows when a new version has release notes. CMD + Enter saves comments."));

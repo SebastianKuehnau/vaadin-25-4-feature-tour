@@ -1,13 +1,12 @@
 package com.vaadin.devrel.featuretour.showcase.components;
 
+import com.vaadin.devrel.featuretour.base.ui.ExternalLink;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
 import com.vaadin.flow.component.breadcrumbs.Breadcrumbs;
 import com.vaadin.flow.component.breadcrumbs.BreadcrumbsItem;
 import com.vaadin.flow.component.checkbox.Switch;
-import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -41,9 +40,7 @@ public class NowStableView extends ShowcasePage {
                         Breadcrumbs trail = new Breadcrumbs(); // router mode, e.g. in your AppLayout navbar
                         """);
 
-        var tour = new Anchor("https://github.com/SebastianKuehnau/vaadin-25-3-feature-tour",
-                "The 25.3 feature tour has full pages for both →");
-        tour.setTarget(AnchorTarget.BLANK);
-        add(tour);
+        add(new ExternalLink("https://github.com/SebastianKuehnau/vaadin-25-3-feature-tour",
+                "The 25.3 feature tour has full pages for both →"));
     }
 }

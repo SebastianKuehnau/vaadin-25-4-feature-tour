@@ -25,23 +25,34 @@ public class StylingView extends ShowcasePage {
         addLayerDemo();
     }
 
+    /** A box styled by the layer, optionally with extra class names that app styles target too. */
+    static class LayerBox extends Div {
+        LayerBox(String text, String... classNames) {
+            super(new Span(text));
+            addClassName("layer-box");
+            addClassNames(classNames);
+        }
+    }
+
+    /** One box styled only by the layer, and one where a layered rule and an app rule compete. */
+    static class LayerDemo extends Div {
+        LayerDemo() {
+            var conflicting = new LayerBox("The layer says red with selector "
+                    + "#layer-demo div.layer-box.app-styled.app-styled. The app says green with .layer-box.app-styled. "
+                    + "Green wins.", "app-styled");
+            conflicting.setTestId("layer-conflict");
+            add(new LayerBox("Styled only by the layer: amber, as the layer says."), conflicting);
+            setId("layer-demo");
+            addClassName("layer-demo");
+        }
+    }
+
     private void addLayerDemo() {
-        var layered = new Div(new Span("Styled only by the layer: amber, as the layer says."));
-        layered.addClassName("layer-box");
-        var conflicting = new Div(new Span("The layer says red with selector #layer-demo div.layer-box.app-styled.app-styled. "
-                + "The app says green with .layer-box.app-styled. Green wins."));
-        conflicting.addClassNames("layer-box", "app-styled");
-        conflicting.setTestId("layer-conflict");
-
-        var demo = new Div(layered, conflicting);
-        demo.setId("layer-demo");
-        demo.addClassName("layer-demo");
-
         addDemo("Cascade layers: defaults you can always override",
                 "Rules in a layer have lower priority than rules outside of any layer, regardless of specificity. "
                         + "Ideal for a theme or an add-on's default look: app styles override it without a specificity war.",
-                demo, """
-                        @StyleSheet(value = "styles/tour-defaults.css", layer = "tour-defaults")
+                new LayerDemo(), """
+                        @StyleSheet(value = "styles/tour-defaults.css", **layer = "tour-defaults"**)
                         public class StylingView extends ShowcasePage { ... }
 
                         /* styles/tour-defaults.css: in the layer, very specific */
@@ -50,7 +61,7 @@ public class StylingView extends ShowcasePage {
                         /* styles.css: no layer, less specific, wins */
                         .layer-box.app-styled { background: #dcfce7; }
 
-                        // Also for themes: @StyleSheet(value = Aura.STYLESHEET, layer = "aura")
+                        // Also for themes: @StyleSheet(value = Aura.STYLESHEET, **layer = "aura"**)
                         """);
     }
 }

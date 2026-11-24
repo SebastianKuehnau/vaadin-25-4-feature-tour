@@ -1,14 +1,13 @@
 package com.vaadin.devrel.featuretour.showcase.security;
 
+import com.vaadin.devrel.featuretour.base.ui.CompareColumn;
+import com.vaadin.devrel.featuretour.base.ui.LogTable;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
+import com.vaadin.devrel.featuretour.base.ui.StatusText;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Pre;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -53,13 +52,8 @@ public class DeclaredJsView extends ShowcasePage {
 
     static final KeyFilters FILTERS = JsSnippets.of(KeyFilters.class);
 
-    final TextField snippet = new TextField("Text to copy");
-    final Button copy = new Button("Copy", VaadinIcon.COPY.create());
-    final Button viewport = new Button("Read viewport");
-    final Span copyStatus = new Span();
-    final TextField command = new TextField("Command");
-    final Div commandLog = new Div();
-    int submitted;
+    final TextField snippet = new TextField("Text to copy", "VAADIN_CSP=strict ./mvnw", "");
+    final StatusText copyStatus = new StatusText("copy-status");
 
     public DeclaredJsView() {
         super("Declared JavaScript",
@@ -72,88 +66,118 @@ public class DeclaredJsView extends ShowcasePage {
         addComparison();
     }
 
+    /** Copies the snippet and reports the Boolean the Clipboard API resolved to. */
+    class CopyButton extends Button {
+        CopyButton() {
+            super("Copy", VaadinIcon.COPY.create());
+            setTestId("copy");
+            addClickListener(e -> getElement().executeJs(ClipboardJs.class)
+                    .copy(snippet.getValue())
+                    .then(copied -> copyStatus.setText(copied
+                            ? "✅ Copied \"" + snippet.getValue() + "\" (JavaScriptResult<Boolean> = true)"
+                            : "⚠️ The browser denied clipboard access (JavaScriptResult<Boolean> = false)")));
+        }
+    }
+
+    /** Reads a JavaScript object into a Java record. */
+    class ViewportButton extends Button {
+        ViewportButton() {
+            super("Read viewport");
+            setTestId("viewport");
+            addClickListener(e -> getElement().executeJs(ClipboardJs.class)
+                    .viewport()
+                    .then(v -> copyStatus.setText("📐 " + v.width() + " × " + v.height() + " px, language "
+                            + v.language() + " (JavaScriptResult<Viewport>, a Java record)")));
+        }
+    }
+
     private void addClipboardDemo() {
-        snippet.setValue("VAADIN_CSP=strict ./mvnw");
         snippet.setWidth("22rem");
-        copy.setTestId("copy");
-        viewport.setTestId("viewport");
-        copyStatus.setTestId("copy-status");
-        copyStatus.addClassName("showcase-status");
 
-        copy.addClickListener(e -> copy.getElement().executeJs(ClipboardJs.class)
-                .copy(snippet.getValue())
-                .then(copied -> copyStatus.setText(copied
-                        ? "✅ Copied \"" + snippet.getValue() + "\" (JavaScriptResult<Boolean> = true)"
-                        : "⚠️ The browser denied clipboard access (JavaScriptResult<Boolean> = false)")));
-        viewport.addClickListener(e -> viewport.getElement().executeJs(ClipboardJs.class)
-                .viewport()
-                .then(v -> copyStatus.setText("📐 " + v.width() + " × " + v.height() + " px, language " + v.language()
-                        + " (JavaScriptResult<Viewport>, a Java record)")));
-
-        var row = new FlexLayout(snippet, copy, viewport);
+        var row = new FlexLayout(snippet, new CopyButton(), new ViewportButton());
         row.addClassName("showcase-row");
         addDemo("Typed results: copy to clipboard",
                 "The promise from the Clipboard API resolves to a Boolean on the server. A JavaScript object can just as "
                         + "well become a Java record: the value is converted with Jackson.",
                 new VerticalLayout(row, copyStatus), """
-                        @JsDefinition
+                        **@JsDefinition**
                         public interface ClipboardJs extends Serializable {
-                            @JsExpression("return navigator.clipboard.writeText($0).then(() => true, () => false)")
-                            JavaScriptResult<Boolean> copy(String text);
+                            **@JsExpression**("return navigator.clipboard.writeText($0).then(() => true, () => false)")
+                            **JavaScriptResult<Boolean>** copy(String text);
 
-                            @JsExpression("return { width: window.innerWidth, height: window.innerHeight, language: navigator.language }")
-                            JavaScriptResult<Viewport> viewport();
+                            **@JsExpression**("return { width: window.innerWidth, height: window.innerHeight, language: navigator.language }")
+                            **JavaScriptResult<Viewport>** viewport();
                         }
 
-                        copy.getElement().executeJs(ClipboardJs.class)
-                                .copy(snippet.getValue())
-                                .then(copied -> status.setText(copied ? "Copied" : "Denied"));
+                        record Viewport(int width, int height, String language) { }
+
+                        class CopyButton extends Button {
+                            CopyButton() {
+                                super("Copy", VaadinIcon.COPY.create());
+                                addClickListener(e -> getElement().**executeJs(ClipboardJs.class)**
+                                        .copy(snippet.getValue())
+                                        .then(copied -> copyStatus.setText(copied ? "Copied" : "Denied")));
+                            }
+                        }
                         """);
     }
 
+    /** The commands that reached the server. */
+    static class CommandLog extends LogTable {
+        int submitted;
+
+        CommandLog() {
+            super("Only Enter reaches the server. Other keys are filtered in the browser.");
+            setTestId("command-log");
+        }
+
+        void submit(String command) {
+            log("⏎ #" + ++submitted, command);
+        }
+    }
+
+    /** Sends its value to the server on Enter only, filtered in the browser by a declared filter. */
+    static class CommandField extends TextField {
+        CommandField(CommandLog log) {
+            super("Command");
+            setPlaceholder("Type and press Enter");
+            setWidth("22rem");
+            setTestId("command");
+            getElement().addEventListener("keydown",
+                            event -> log.submit(event.getEventData().get("element.value").asString()))
+                    .setFilterExpression(FILTERS.isKey("Enter"))
+                    .addEventDataPath("element.value");
+        }
+    }
+
     private void addKeyFilterDemo() {
-        command.setPlaceholder("Type and press Enter");
-        command.setWidth("22rem");
-        command.setTestId("command");
-        commandLog.setTestId("command-log");
-        commandLog.addClassName("csp-warnings");
-        commandLog.add(new Span("Only Enter reaches the server. Other keys are filtered in the browser."));
-
-        command.getElement().addEventListener("keydown", event -> {
-                    String value = event.getEventData().get("element.value").asString();
-                    if (submitted++ == 0) {
-                        commandLog.removeAll();
-                    }
-                    var line = new Div(new Span("⏎ #" + submitted), new Span(value));
-                    line.addClassName("csp-warning");
-                    commandLog.addComponentAsFirst(line);
-                })
-                .setFilterExpression(FILTERS.isKey("Enter"))
-                .addEventDataPath("element.value");
-
+        var log = new CommandLog();
         addDemo("Event data paths and declared filters",
                 "The filter is declared once and created with an argument per listener. The value of the field travels "
                         + "with the event as a property path, which the browser reads without compiling anything.",
-                new VerticalLayout(command, commandLog), """
+                new VerticalLayout(new CommandField(log), log), """
                         @JsDefinition
                         public interface KeyFilters extends Serializable {
                             @JsExpression("return event.key === $0 && !event.repeat;")
-                            DomEventFilter isKey(String key);
+                            **DomEventFilter** isKey(String key);
                         }
-                        static final KeyFilters FILTERS = JsSnippets.of(KeyFilters.class);
+                        static final KeyFilters FILTERS = **JsSnippets.of(KeyFilters.class)**;
 
-                        command.getElement().addEventListener("keydown", event -> {
-                                    String value = event.getEventData().get("element.value").asString();
-                                    submit(value);
-                                })
-                                .setFilterExpression(FILTERS.isKey("Enter"))
-                                .addEventDataPath("element.value");
+                        class CommandField extends TextField {
+                            CommandField(CommandLog log) {
+                                super("Command");
+                                getElement().addEventListener("keydown",
+                                                event -> log.submit(event.getEventData().get("element.value").asString()))
+                                        **.setFilterExpression(FILTERS.isKey("Enter"))**
+                                        **.addEventDataPath("element.value")**;
+                            }
+                        }
                         """);
     }
 
     private void addComparison() {
         var compare = new Div(
-                column("Before 25.4 (deprecated, needs 'unsafe-eval')", """
+                CompareColumn.code("Before 25.4 (deprecated, needs 'unsafe-eval')", """
                         element.executeJs(
                             "return navigator.clipboard.writeText($0)", text)
                           .then(Boolean.class, ok -> ...);
@@ -162,27 +186,19 @@ public class DeclaredJsView extends ShowcasePage {
                           .setFilter("event.key === 'Enter'")
                           .addEventData("element.value");
                         """),
-                column("25.4 (CSP-safe)", """
-                        element.executeJs(ClipboardJs.class)
+                CompareColumn.code("25.4 (CSP-safe)", """
+                        element.**executeJs(ClipboardJs.class)**
                           .copy(text)
                           .then(ok -> ...);
 
                         element.addEventListener("keydown", e -> ...)
-                          .setFilterExpression(FILTERS.isKey("Enter"))
-                          .addEventDataPath("element.value");
+                          **.setFilterExpression(FILTERS.isKey("Enter"))**
+                          **.addEventDataPath("element.value")**;
                         """));
         compare.addClassName("compare-grid");
         addDemo("Old vs. new",
                 "The string variants still work, but setFilter(String) and addEventData(String) are deprecated since "
                         + "25.4, and vaadin.csp=warn reports every call site that still uses them.",
                 compare, "");
-    }
-
-    private static Component column(String title, String code) {
-        var pre = new Pre(code.strip());
-        pre.addClassName("showcase-code");
-        var column = new Div(new H3(title), pre);
-        column.addClassName("compare-column");
-        return column;
     }
 }

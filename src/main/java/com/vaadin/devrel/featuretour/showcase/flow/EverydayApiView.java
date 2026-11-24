@@ -2,6 +2,7 @@ package com.vaadin.devrel.featuretour.showcase.flow;
 
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
+import com.vaadin.devrel.featuretour.base.ui.StatusText;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -44,12 +45,6 @@ public class EverydayApiView extends ShowcasePage {
         }
     }
 
-    final Person person = new Person();
-    final TextField birthDate = new TextField("Birth date (yyyy-mm-dd)");
-    final Span beanState = new Span();
-    final Span ancestor = new Span();
-    final Span url = new Span();
-
     public EverydayApiView() {
         super("Everyday API Upgrades",
                 "Typed, null-safe APIs for things almost every app does: time zones, optional values, "
@@ -62,92 +57,122 @@ public class EverydayApiView extends ShowcasePage {
         addUrlDemo();
     }
 
-    private void addConverterDemo() {
-        var binder = new Binder<>(Person.class);
-        binder.forField(birthDate)
-                .withNullSafeConverter(LocalDate::parse, LocalDate::toString, e -> "Use the format 2026-11-20", "")
-                .bind(Person::getBirthDate, Person::setBirthDate);
-        binder.setBean(person);
-        birthDate.setTestId("birth-date");
-        beanState.setTestId("bean-state");
-        beanState.addClassName("showcase-status");
-        showBean();
-        binder.addValueChangeListener(e -> showBean());
-
-        addDemo("Null-safe converters in Binder",
-                "Type a date, then clear the field. The empty field becomes null in the bean instead of a parse error, "
-                        + "and a null bean value empties the field. The functions never see null or the empty string.",
-                new VerticalLayout(birthDate, beanState), """
-                        binder.forField(birthDate)
-                                .withNullSafeConverter(LocalDate::parse, LocalDate::toString,
-                                        e -> "Use the format 2026-11-20", "")
-                                .bind(Person::getBirthDate, Person::setBirthDate);
-
-                        // Or wrap an existing converter:
-                        Converter.nullSafeConverter(new StringToIntegerConverter("Not a number"), "");
-                        """);
-    }
-
-    private void showBean() {
-        beanState.setText("person.getBirthDate() = " + person.getBirthDate());
-    }
-
-    private void addAncestorDemo() {
-        var button = new Button("Which section am I in?");
-        button.setTestId("find-ancestor");
-        ancestor.setTestId("ancestor");
-        ancestor.addClassName("showcase-status");
-        button.addClickListener(e -> ancestor.setText(button
-                .findAncestor(c -> c.getElement().hasAttribute("data-area"))
-                .map(c -> "Nearest ancestor with data-area: " + c.getElement().getAttribute("data-area")
-                        + " (a " + c.getClass().getSimpleName() + ")")
-                .orElse("No such ancestor")));
-
-        var inner = new Div(new FlexLayout(button));
-        inner.getElement().setAttribute("data-area", "inner panel");
-        inner.addClassName("ancestor-box");
-        var outer = new Div(new Span("Outer panel"), inner);
-        outer.getElement().setAttribute("data-area", "outer panel");
-        outer.addClassName("ancestor-box");
-
-        addDemo("Component.findAncestor(predicate)",
-                "findAncestor(Class) finds by type. The new overload takes any predicate and walks up the parents.",
-                new VerticalLayout(outer, ancestor), """
-                        Optional<Component> panel = button.findAncestor(
-                                c -> c.getElement().hasAttribute("data-area"));
-                        """);
-    }
-
     private void addTimeZoneDemo() {
         ExtendedClientDetails details = UI.getCurrentOrThrow().getPage().getExtendedClientDetails();
         var format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
-        var zone = new Span("Browser zone: " + details.getZoneId() + " · browser time: "
+        var zone = new StatusText("time-zone", "Browser zone: " + details.getZoneId() + " · browser time: "
                 + details.getBrowserDateTime().format(format) + " · server zone: " + ZoneId.systemDefault());
-        zone.addClassName("showcase-status");
-        zone.setTestId("time-zone");
         addDemo("The user's time zone as a java.time ZoneId",
                 "Show times in the user's own time zone without parsing a time zone id or calculating with offsets. "
                         + "ExtendedClientDetails gives you a ZoneId and the browser's ZonedDateTime, ready for java.time.",
                 zone, """
                         ExtendedClientDetails details = UI.getCurrent().getPage().getExtendedClientDetails();
-                        ZoneId zone = details.getZoneId();
-                        ZonedDateTime now = details.getBrowserDateTime();
+                        ZoneId zone = details.**getZoneId()**;
+                        ZonedDateTime now = details.**getBrowserDateTime()**;
+                        """);
+    }
+
+    /** Edits an optional birth date and shows what ends up in the bean. */
+    static class BirthDateForm extends VerticalLayout {
+        final Person person = new Person();
+        final TextField birthDate = new TextField("Birth date (yyyy-mm-dd)");
+        final StatusText beanState = new StatusText("bean-state");
+
+        BirthDateForm() {
+            var binder = new Binder<>(Person.class);
+            binder.forField(birthDate)
+                    .withNullSafeConverter(LocalDate::parse, LocalDate::toString, e -> "Use the format 2026-11-20", "")
+                    .bind(Person::getBirthDate, Person::setBirthDate);
+            binder.setBean(person);
+            binder.addValueChangeListener(e -> showBean());
+            birthDate.setTestId("birth-date");
+            showBean();
+            add(birthDate, beanState);
+        }
+
+        private void showBean() {
+            beanState.setText("person.getBirthDate() = " + person.getBirthDate());
+        }
+    }
+
+    private void addConverterDemo() {
+        addDemo("Null-safe converters in Binder",
+                "Type a date, then clear the field. The empty field becomes null in the bean instead of a parse error, "
+                        + "and a null bean value empties the field. The functions never see null or the empty string.",
+                new BirthDateForm(), """
+                        class BirthDateForm extends VerticalLayout {
+                            final Person person = new Person();
+                            final TextField birthDate = new TextField("Birth date (yyyy-mm-dd)");
+
+                            BirthDateForm() {
+                                var binder = new Binder<>(Person.class);
+                                binder.forField(birthDate)
+                                        **.withNullSafeConverter(LocalDate::parse, LocalDate::toString,
+                                                e -> "Use the format 2026-11-20", "")**
+                                        .bind(Person::getBirthDate, Person::setBirthDate);
+                                binder.setBean(person);
+                                add(birthDate);
+                            }
+                        }
+
+                        // Or wrap an existing converter:
+                        **Converter.nullSafeConverter**(new StringToIntegerConverter("Not a number"), "");
+                        """);
+    }
+
+    /** A boxed panel that names its area in a data-area attribute. */
+    static class AreaPanel extends Div {
+        AreaPanel(String area, Component... content) {
+            super(content);
+            getElement().setAttribute("data-area", area);
+            addClassName("ancestor-box");
+        }
+    }
+
+    /** Reports the nearest ancestor that has a data-area attribute. */
+    static class WhereAmIButton extends Button {
+        WhereAmIButton(StatusText result) {
+            super("Which section am I in?");
+            setTestId("find-ancestor");
+            addClickListener(e -> result.setText(findAncestor(c -> c.getElement().hasAttribute("data-area"))
+                    .map(c -> "Nearest ancestor with data-area: " + c.getElement().getAttribute("data-area")
+                            + " (a " + c.getClass().getSimpleName() + ")")
+                    .orElse("No such ancestor")));
+        }
+    }
+
+    private void addAncestorDemo() {
+        var ancestor = new StatusText("ancestor");
+        var panels = new AreaPanel("outer panel", new Span("Outer panel"),
+                new AreaPanel("inner panel", new FlexLayout(new WhereAmIButton(ancestor))));
+
+        addDemo("Component.findAncestor(predicate)",
+                "findAncestor(Class) finds by type. The new overload takes any predicate and walks up the parents.",
+                new VerticalLayout(panels, ancestor), """
+                        class WhereAmIButton extends Button {
+                            WhereAmIButton(StatusText result) {
+                                super("Which section am I in?");
+                                addClickListener(e -> result.setText(
+                                        **findAncestor(c -> c.getElement().hasAttribute("data-area"))**
+                                                .map(c -> c.getElement().getAttribute("data-area"))
+                                                .orElse("No such ancestor")));
+                            }
+                        }
                         """);
     }
 
     private void addUrlDemo() {
         String link = RouteConfiguration.forSessionScope().getUrl(LifecycleView.class, RouteParameters.empty(),
                 QueryParameters.of("step", "42"));
-        url.setText(link);
+        var url = new Span(link);
         url.setTestId("route-url");
-        var anchor = new Anchor(link, "Open it");
-        var row = new FlexLayout(new Span("getUrl(...) = "), url, anchor);
+        var row = new FlexLayout(new Span("getUrl(...) = "), url, new Anchor(link, "Open it"));
         row.addClassName("showcase-row");
         addDemo("RouteConfiguration.getUrl() with query parameters",
                 "Build a link to a route including its query string, without concatenating strings yourself.",
                 row, """
-                        String url = RouteConfiguration.forSessionScope().getUrl(LifecycleView.class,
-                                RouteParameters.empty(), QueryParameters.of("step", "42"));
+                        String url = RouteConfiguration.forSessionScope().**getUrl(LifecycleView.class,
+                                RouteParameters.empty(), QueryParameters.of("step", "42"))**;
                         // lifecycle-events?step=42
                         """);
     }

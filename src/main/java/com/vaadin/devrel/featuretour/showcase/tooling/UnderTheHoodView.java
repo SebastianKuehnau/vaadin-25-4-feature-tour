@@ -3,7 +3,7 @@ package com.vaadin.devrel.featuretour.showcase.tooling;
 import com.vaadin.devrel.featuretour.base.ui.GuideCards;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.devrel.featuretour.base.ui.StatusText;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -21,11 +21,8 @@ public class UnderTheHoodView extends ShowcasePage {
                 "Changes that need no demo but matter when you upgrade.",
                 "https://vaadin.com/docs/v25/upgrading");
 
-        var versions = new Span("This app runs Flow " + Version.getFullVersion() + " on Spring Boot "
-                + SpringBootVersion.getVersion() + " and Java " + Runtime.version().feature() + ".");
-        versions.addClassName("showcase-status");
-        versions.setTestId("versions");
-        add(versions);
+        add(new StatusText("versions", "This app runs Flow " + Version.getFullVersion() + " on Spring Boot "
+                + SpringBootVersion.getVersion() + " and Java " + Runtime.version().feature() + "."));
 
         add(new GuideCards()
                 .card("Spring Boot 4.2 and Node.js 26",

@@ -31,7 +31,7 @@ class TextSelectionViewTest extends SpringBrowserlessTest {
         test(version).setValue("25.4.0-betta2");
         UI.getCurrent().getInternals().dumpPendingJavaScriptInvocations();
 
-        view.validate();
+        view.versionForm.validate();
 
         assertThat(version.isInvalid()).isTrue();
         assertThat($(Span.class).testId("version-result").getText()).contains("position 10", "\"ta2\"");

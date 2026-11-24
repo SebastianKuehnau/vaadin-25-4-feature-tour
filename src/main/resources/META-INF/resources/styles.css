@@ -199,6 +199,11 @@
   min-width: 0;
 }
 
+.showcase-code strong {
+  font-weight: 700;
+  color: var(--aura-accent-color, #0368de);
+}
+
 .card-grid .showcase-code {
   white-space: pre-wrap;
 }
@@ -584,27 +589,30 @@
 }
 
 .csp-table {
-  display: grid;
   width: 100%;
+  border-collapse: collapse;
   font-size: var(--aura-font-size-s, 0.875rem);
 }
 
-.csp-row {
-  display: grid;
-  grid-template-columns: 6rem 1fr 16rem;
-  gap: var(--vaadin-gap-m, 1rem);
-  padding-block: 0.4rem;
+.csp-table th,
+.csp-table td {
+  padding: 0.4rem var(--vaadin-gap-m, 1rem) 0.4rem 0;
+  text-align: start;
+  vertical-align: top;
   border-bottom: 1px solid var(--vaadin-border-color-secondary, rgba(0, 0, 0, 0.1));
 }
 
-.csp-row > span:first-child {
-  font-family: monospace;
-  font-weight: 600;
+.csp-table thead th {
+  color: var(--vaadin-text-color-secondary);
 }
 
-.csp-header {
-  font-weight: 600;
-  color: var(--vaadin-text-color-secondary);
+.csp-table tbody th {
+  font-family: monospace;
+  width: 6rem;
+}
+
+.csp-table td:last-child {
+  width: 16rem;
 }
 
 .csp-target {
@@ -613,19 +621,30 @@
   border-radius: var(--vaadin-radius-m, 8px);
 }
 
-.csp-warnings {
+.log-table {
   width: 100%;
+  border-collapse: collapse;
   font-family: monospace;
   font-size: 0.8rem;
 }
 
-.csp-warning {
-  overflow-wrap: anywhere;
-  display: flex;
-  gap: 0.75rem;
+.log-table caption {
+  text-align: start;
+  font-family: var(--aura-font-family, inherit);
+  color: var(--vaadin-text-color-secondary);
 }
 
-.csp-warning > span:nth-child(2) {
+.log-table td {
+  padding: 0 0.75rem 0 0;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+.log-table td:first-child {
+  white-space: nowrap;
+}
+
+.csp-warnings td:nth-child(2) {
   color: var(--aura-orange, #b45309);
   font-weight: 600;
 }
@@ -699,27 +718,27 @@
 
 .lifecycle-log {
   width: 100%;
-  max-height: 22rem;
-  overflow: auto;
+  border-collapse: collapse;
   font-size: 0.8rem;
 }
 
-.lifecycle-line {
-  display: grid;
-  grid-template-columns: 7rem 9rem 1fr 14rem 6rem;
-  gap: 0.75rem;
-  padding-block: 0.2rem;
+.lifecycle-log th,
+.lifecycle-log td {
+  padding: 0.2rem 0.75rem 0.2rem 0;
+  text-align: start;
+  vertical-align: top;
   border-bottom: 1px solid var(--vaadin-border-color-secondary, rgba(0, 0, 0, 0.08));
 }
 
-.lifecycle-line:first-child {
-  font-weight: 600;
+.lifecycle-log thead th {
   color: var(--vaadin-text-color-secondary);
 }
 
-.lifecycle-line > span:last-child {
+.lifecycle-log td:last-child,
+.lifecycle-log th:last-child {
   text-align: end;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* Unlayered app style: wins over the layered rule in styles/tour-defaults.css */

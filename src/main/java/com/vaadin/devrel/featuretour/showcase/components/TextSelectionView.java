@@ -2,10 +2,10 @@ package com.vaadin.devrel.featuretour.showcase.components;
 
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
+import com.vaadin.devrel.featuretour.base.ui.StatusText;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -24,9 +24,7 @@ public class TextSelectionView extends ShowcasePage {
 
     static final Pattern VERSION = Pattern.compile("\\d+\\.\\d+\\.\\d+(-(alpha|beta|rc)\\d+)?");
 
-    final TextField version = new TextField("Vaadin version");
-    final Span result = new Span();
-    final TextField playground = new TextField("Playground");
+    final VersionForm versionForm = new VersionForm();
 
     public TextSelectionView() {
         super("Text Selection",
@@ -38,42 +36,57 @@ public class TextSelectionView extends ShowcasePage {
         addPlayground();
     }
 
-    private void addValidationDemo() {
-        version.setValue("25.4.0-betta2");
-        version.setWidth("20rem");
-        version.setTestId("version");
-        result.addClassName("showcase-status");
-        result.setTestId("version-result");
-        var save = new Button("Save", e -> validate());
-        save.addThemeVariants(ButtonVariant.PRIMARY);
-        save.setTestId("save-version");
+    /** A version field with a Save button. Failed validation selects the part of the value to fix. */
+    static class VersionForm extends VerticalLayout {
+        final TextField version = new TextField("Vaadin version", "25.4.0-betta2", "");
+        final StatusText result = new StatusText("version-result");
 
+        VersionForm() {
+            version.setWidth("20rem");
+            version.setTestId("version");
+            version.setErrorMessage("Expected something like 25.4.0 or 25.4.0-beta2");
+            var save = new Button("Save", e -> validate());
+            save.addThemeVariants(ButtonVariant.PRIMARY);
+            save.setTestId("save-version");
+            var row = new HorizontalLayout(version, save);
+            row.setAlignItems(Alignment.BASELINE);
+            add(row, result);
+        }
+
+        void validate() {
+            String value = version.getValue();
+            int bad = firstInvalidIndex(value);
+            if (bad < 0) {
+                version.setInvalid(false);
+                result.setText("✅ Saved " + value);
+                return;
+            }
+            version.setInvalid(true);
+            version.focus();
+            version.setSelectionRange(bad, value.length());
+            result.setText("❌ Invalid from position " + bad + ": \"" + value.substring(bad) + "\" is selected");
+        }
+    }
+
+    private void addValidationDemo() {
         addDemo("Point at the invalid part after validation",
                 "Press Save: the validator finds where the value stops matching and selects the rest, so the user "
                         + "sees exactly what to fix and can type over it.",
-                new VerticalLayout(new HorizontalLayout(version, save) {{ setAlignItems(Alignment.BASELINE); }}, result), """
-                        int bad = firstInvalidIndex(version.getValue());
-                        if (bad >= 0) {
-                            version.setInvalid(true);
-                            version.focus();
-                            version.setSelectionRange(bad, version.getValue().length());
+                versionForm, """
+                        class VersionForm extends VerticalLayout {
+                            final TextField version = new TextField("Vaadin version", "25.4.0-betta2", "");
+
+                            void validate() {
+                                String value = version.getValue();
+                                int bad = firstInvalidIndex(value);
+                                if (bad >= 0) {
+                                    version.setInvalid(true);
+                                    version.focus();
+                                    version.**setSelectionRange(bad, value.length())**;
+                                }
+                            }
                         }
                         """);
-    }
-
-    void validate() {
-        String value = version.getValue();
-        int bad = firstInvalidIndex(value);
-        if (bad < 0) {
-            version.setInvalid(false);
-            result.setText("✅ Saved " + value);
-            return;
-        }
-        version.setErrorMessage("Expected something like 25.4.0 or 25.4.0-beta2");
-        version.setInvalid(true);
-        version.focus();
-        version.setSelectionRange(bad, value.length());
-        result.setText("❌ Invalid from position " + bad + ": \"" + value.substring(bad) + "\" is selected");
     }
 
     /** The index of the first character after the longest valid prefix, or -1 if the value is valid. */
@@ -90,36 +103,55 @@ public class TextSelectionView extends ShowcasePage {
         return 0;
     }
 
+    /** Buttons that select text or move the cursor in a field. Each focuses the field first. */
+    static class SelectionButtons extends FlexLayout {
+        final TextField field;
+
+        SelectionButtons(TextField field) {
+            this.field = field;
+            add(action("selectAll()", field::selectAll),
+                    action("Select \"beta2\"", () -> {
+                        int start = field.getValue().indexOf("beta2");
+                        field.setSelectionRange(start, start + "beta2".length());
+                    }),
+                    action("Cursor to start", () -> field.setCursorPosition(0)),
+                    action("Cursor to end", () -> field.setCursorPosition(field.getValue().length())));
+            addClassName("showcase-row");
+        }
+
+        private Button action(String text, Runnable action) {
+            return new Button(text, e -> {
+                field.focus();
+                action.run();
+            });
+        }
+    }
+
     private void addPlayground() {
-        playground.setValue("Vaadin 25.4.0-beta2 feature tour");
+        var playground = new TextField("Playground", "Vaadin 25.4.0-beta2 feature tour", "");
         playground.setWidth("24rem");
         playground.setTestId("playground");
-        var all = new Button("selectAll()", e -> {
-            playground.focus();
-            playground.selectAll();
-        });
-        var beta = new Button("Select \"beta2\"", e -> {
-            int start = playground.getValue().indexOf("beta2");
-            playground.focus();
-            playground.setSelectionRange(start, start + "beta2".length());
-        });
-        var start = new Button("Cursor to start", e -> {
-            playground.focus();
-            playground.setCursorPosition(0);
-        });
-        var end = new Button("Cursor to end", e -> {
-            playground.focus();
-            playground.setCursorPosition(playground.getValue().length());
-        });
-        var row = new FlexLayout(all, beta, start, end);
-        row.addClassName("showcase-row");
         addDemo("Playground",
                 "Focus the field first: browsers only show a selection in the focused field.",
-                new VerticalLayout(playground, row), """
-                        field.focus();
-                        field.selectAll();
-                        field.setSelectionRange(start, end);
-                        field.setCursorPosition(0);
+                new VerticalLayout(playground, new SelectionButtons(playground)), """
+                        class SelectionButtons extends FlexLayout {
+                            SelectionButtons(TextField field) {
+                                add(action("selectAll()", field::**selectAll**),
+                                        action("Select \"beta2\"", () -> {
+                                            int start = field.getValue().indexOf("beta2");
+                                            field.**setSelectionRange(start, start + "beta2".length())**;
+                                        }),
+                                        action("Cursor to start", () -> field.**setCursorPosition(0)**),
+                                        action("Cursor to end", () -> field.**setCursorPosition(field.getValue().length())**));
+                            }
+
+                            private Button action(String text, Runnable action) {
+                                return new Button(text, e -> {
+                                    field.focus(); // browsers only show a selection in the focused field
+                                    action.run();
+                                });
+                            }
+                        }
                         """);
     }
 }

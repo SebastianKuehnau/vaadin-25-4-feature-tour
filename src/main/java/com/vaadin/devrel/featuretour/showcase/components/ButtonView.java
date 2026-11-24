@@ -1,13 +1,14 @@
 package com.vaadin.devrel.featuretour.showcase.components;
 
+import com.vaadin.devrel.featuretour.base.ui.CompareColumn;
 import com.vaadin.devrel.featuretour.base.ui.ShowcaseInfo;
 import com.vaadin.devrel.featuretour.base.ui.ShowcasePage;
+import com.vaadin.devrel.featuretour.base.ui.StatusText;
 import com.vaadin.devrel.featuretour.base.ui.Tier;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.DisableOnClickMode;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
@@ -21,78 +22,80 @@ public class ButtonView extends ShowcasePage {
 
     static final long SLOW_MILLIS = 2000;
 
-    final Button plain = new Button("Save (no protection)");
-    final Button untilEnabled = new Button("Save (setDisableOnClick(true))");
-    final Button untilResponse = new Button("Save (UNTIL_RESPONSE)");
-    final Span plainCount = new Span("0 saves");
-    final Span enabledCount = new Span("0 saves");
-    final Span responseCount = new Span("0 saves");
-    int plainSaves;
-    int enabledSaves;
-    int responseSaves;
-
     public ButtonView() {
         super("Double-Click Protection",
                 "DisableOnClickMode.UNTIL_RESPONSE disables the button on click and enables it again automatically "
                         + "with the next response, once the click listeners have run. Each listener here takes 2 seconds.",
                 "https://vaadin.com/docs/next/components/button");
 
-        plain.addClickListener(e -> plainCount.setText(saves(++plainSaves) + slowSave()));
-        plain.setTestId("plain");
-
+        var plain = new SlowSaveButton("Save (no protection)", "plain");
+        var untilEnabled = new SlowSaveButton("Save (setDisableOnClick(true))", "until-enabled");
         untilEnabled.setDisableOnClick(true);
-        untilEnabled.addClickListener(e -> enabledCount.setText(saves(++enabledSaves) + slowSave()
-                + " · stays disabled until setEnabled(true)"));
-        untilEnabled.setTestId("until-enabled");
-        var reEnable = new Button("setEnabled(true)", e -> untilEnabled.setEnabled(true));
-
+        var untilResponse = new SlowSaveButton("Save (UNTIL_RESPONSE)", "until-response");
         untilResponse.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
-        untilResponse.addClickListener(e -> responseCount.setText(saves(++responseSaves) + slowSave()));
-        untilResponse.setTestId("until-response");
-        responseCount.setTestId("response-count");
 
         var compare = new Div(
-                column("Before: no protection", "Double-click: both clicks are queued, so you save twice.",
-                        plain, plainCount),
-                column("Before: setDisableOnClick(true)", "Safe, but you must enable the button yourself, also on errors.",
-                        untilEnabled, enabledCount, reEnable),
-                column("25.4: UNTIL_RESPONSE", "Disabled while the server works, enabled again by the response.",
-                        untilResponse, responseCount));
+                new ButtonColumn("Before: no protection", "Double-click: both clicks are queued, so you save twice.",
+                        plain, plain.count),
+                new ButtonColumn("Before: setDisableOnClick(true)",
+                        "Safe, but you must enable the button yourself, also on errors.",
+                        untilEnabled, untilEnabled.count,
+                        new Button("setEnabled(true)", e -> untilEnabled.setEnabled(true))),
+                new ButtonColumn("25.4: UNTIL_RESPONSE", "Disabled while the server works, enabled again by the response.",
+                        untilResponse, untilResponse.count));
         compare.addClassName("compare-grid");
 
         addDemo("Double-click each button",
                 "All three listeners sleep for 2 seconds to simulate a slow save.",
                 compare, """
-                        Button save = new Button("Save");
-                        save.setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE);
-                        save.addClickListener(e -> service.save()); // slow
+                        var untilResponse = new SlowSaveButton("Save (UNTIL_RESPONSE)");
+                        untilResponse.**setDisableOnClick(DisableOnClickMode.UNTIL_RESPONSE)**;
 
-                        // Before 25.4: UNTIL_ENABLED, the default for setDisableOnClick(true)
-                        save.setDisableOnClick(true);
-                        save.addClickListener(e -> {
-                            try { service.save(); } finally { save.setEnabled(true); }
-                        });
+                        // Before 25.4: UNTIL_ENABLED, the default for setDisableOnClick(true).
+                        // You must call setEnabled(true) yourself, also when the save fails.
+                        var untilEnabled = new SlowSaveButton("Save (setDisableOnClick(true))");
+                        untilEnabled.setDisableOnClick(true);
+
+                        class SlowSaveButton extends Button {
+                            SlowSaveButton(String text) {
+                                super(text);
+                                addClickListener(e -> service.save()); // takes 2 seconds
+                            }
+                        }
                         """);
     }
 
-    private static String saves(int count) {
-        return count + (count == 1 ? " save" : " saves");
-    }
+    /** A save button whose listener takes 2 seconds, with a count of the saves it made. */
+    static class SlowSaveButton extends Button {
+        final StatusText count;
+        int saves;
 
-    private static String slowSave() {
-        try {
-            Thread.sleep(SLOW_MILLIS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        SlowSaveButton(String text, String testId) {
+            super(text);
+            setTestId(testId);
+            count = new StatusText(testId + "-count", "0 saves");
+            addClickListener(e -> {
+                slowSave();
+                saves++;
+                count.setText(saves + (saves == 1 ? " save" : " saves"));
+            });
         }
-        return "";
+
+        private static void slowSave() {
+            try {
+                Thread.sleep(SLOW_MILLIS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
-    private static Div column(String title, String text, com.vaadin.flow.component.Component... content) {
-        var column = new Div(new H3(title), new Paragraph(text));
-        column.add(content);
-        column.addClassName("compare-column");
-        column.addClassName("button-column");
-        return column;
+    /** One way to protect a button, explained, next to the button itself. */
+    static class ButtonColumn extends CompareColumn {
+        ButtonColumn(String title, String text, Component... content) {
+            super(title, new Paragraph(text));
+            add(content);
+            addClassName("button-column");
+        }
     }
 }

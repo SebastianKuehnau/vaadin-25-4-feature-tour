@@ -29,7 +29,7 @@ class ButtonViewTest extends SpringBrowserlessTest {
 
         assertThat(enabledDuringClick).as("disabled while the click is handled").isFalse();
         assertThat(save.isEnabled()).as("enabled again by the response").isTrue();
-        assertThat($(Span.class).testId("response-count").getText()).isEqualTo("1 save");
+        assertThat($(Span.class).testId("until-response-count").getText()).isEqualTo("1 save");
     }
 
     @Test

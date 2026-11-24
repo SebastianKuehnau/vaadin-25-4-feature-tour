@@ -36,17 +36,7 @@ import java.util.List;
 @ShowcaseInfo(summary = "LABEL_ASIDE on fields, and label text alignment in Form Layout.", tiers = Tier.FREE)
 public class LabelsAsideView extends ShowcasePage {
 
-    final TextField name = new TextField("Name");
-    final ComboBox<String> country = new ComboBox<>("Country");
-    final DatePicker start = new DatePicker("Start date");
-    final TimePicker time = new TimePicker("Daily stand-up");
-    final Select<String> role = new Select<>();
-    final CheckboxGroup<String> topics = new CheckboxGroup<>("Topics");
-    final RadioButtonGroup<String> level = new RadioButtonGroup<>("Level");
-    final IntegerSlider experience = new IntegerSlider("Years of Vaadin", 0, 25);
-    final Switch aside = new Switch("Labels aside", true);
-    final FormLayout form = new FormLayout();
-    final RadioButtonGroup<LabelTextAlign> align = new RadioButtonGroup<>("Label text alignment");
+    final AsideFields fields = new AsideFields();
 
     public LabelsAsideView() {
         super("Forms: Labels Aside",
@@ -58,83 +48,132 @@ public class LabelsAsideView extends ShowcasePage {
         addFormLayoutDemo();
     }
 
+    /** One field of each kind that supports LABEL_ASIDE, without a Form Layout around them. */
+    static class AsideFields extends VerticalLayout {
+        final TextField name = new TextField("Name");
+        final ComboBox<String> country = new ComboBox<>("Country", "Finland", "Germany", "Spain", "United States");
+        final DatePicker start = new DatePicker("Start date");
+        final TimePicker time = new TimePicker("Daily stand-up");
+        final Select<String> role = new Select<>("Role", e -> { }, "Developer", "Architect", "DevRel");
+        final CheckboxGroup<String> topics = new CheckboxGroup<>("Topics", "Flow", "Hilla", "Copilot");
+        final RadioButtonGroup<String> level = new RadioButtonGroup<>("Level", "Beginner", "Advanced");
+        final IntegerSlider experience = new IntegerSlider("Years of Vaadin", 0, 25);
+
+        AsideFields() {
+            add(name, country, start, time, role, topics, level, experience);
+            setPadding(false);
+            addClassName("aside-fields");
+            name.setTestId("aside-name");
+            experience.setValue(7);
+            setLabelsAside(true);
+        }
+
+        void setLabelsAside(boolean on) {
+            if (on) {
+                name.addThemeVariants(TextFieldVariant.LABEL_ASIDE);
+                country.addThemeVariants(ComboBoxVariant.LABEL_ASIDE);
+                start.addThemeVariants(DatePickerVariant.LABEL_ASIDE);
+                time.addThemeVariants(TimePickerVariant.LABEL_ASIDE);
+                role.addThemeVariants(SelectVariant.LABEL_ASIDE);
+                topics.addThemeVariants(CheckboxGroupVariant.LABEL_ASIDE);
+                level.addThemeVariants(RadioGroupVariant.LABEL_ASIDE);
+                experience.addThemeVariants(SliderVariant.LABEL_ASIDE);
+            } else {
+                name.removeThemeVariants(TextFieldVariant.LABEL_ASIDE);
+                country.removeThemeVariants(ComboBoxVariant.LABEL_ASIDE);
+                start.removeThemeVariants(DatePickerVariant.LABEL_ASIDE);
+                time.removeThemeVariants(TimePickerVariant.LABEL_ASIDE);
+                role.removeThemeVariants(SelectVariant.LABEL_ASIDE);
+                topics.removeThemeVariants(CheckboxGroupVariant.LABEL_ASIDE);
+                level.removeThemeVariants(RadioGroupVariant.LABEL_ASIDE);
+                experience.removeThemeVariants(SliderVariant.LABEL_ASIDE);
+            }
+        }
+    }
+
     private void addFieldsDemo() {
-        country.setItems("Finland", "Germany", "Spain", "United States");
-        role.setLabel("Role");
-        role.setItems("Developer", "Architect", "DevRel");
-        topics.setItems("Flow", "Hilla", "Copilot");
-        level.setItems("Beginner", "Advanced");
-        experience.setValue(7);
+        var aside = new Switch("Labels aside", true);
         aside.setTestId("labels-aside-switch");
-        name.setTestId("aside-name");
+        aside.addValueChangeListener(e -> fields.setLabelsAside(e.getValue()));
 
-        aside.addValueChangeListener(e -> applyAside(e.getValue()));
-        applyAside(true);
-
-        var fields = new VerticalLayout(name, country, start, time, role, topics, level, experience);
-        fields.setPadding(false);
-        fields.addClassName("aside-fields");
         addDemo("One variant for every field",
                 "Text fields, combo boxes, pickers, select, checkbox and radio groups and slider all support it. "
                         + "Toggle the switch to compare with labels on top.",
                 new VerticalLayout(aside, fields), """
-                        name.addThemeVariants(TextFieldVariant.LABEL_ASIDE);
-                        country.addThemeVariants(ComboBoxVariant.LABEL_ASIDE);
-                        start.addThemeVariants(DatePickerVariant.LABEL_ASIDE);
-                        time.addThemeVariants(TimePickerVariant.LABEL_ASIDE);
-                        role.addThemeVariants(SelectVariant.LABEL_ASIDE);
-                        topics.addThemeVariants(CheckboxGroupVariant.LABEL_ASIDE);
-                        level.addThemeVariants(RadioGroupVariant.LABEL_ASIDE);
-                        experience.addThemeVariants(SliderVariant.LABEL_ASIDE);
+                        class AsideFields extends VerticalLayout {
+                            final TextField name = new TextField("Name");
+                            final ComboBox<String> country = new ComboBox<>("Country", "Finland", "Germany", "Spain", "United States");
+                            ...
+
+                            void setLabelsAside(boolean on) {
+                                if (on) {
+                                    name.addThemeVariants(**TextFieldVariant.LABEL_ASIDE**);
+                                    country.addThemeVariants(**ComboBoxVariant.LABEL_ASIDE**);
+                                    start.addThemeVariants(**DatePickerVariant.LABEL_ASIDE**);
+                                    time.addThemeVariants(**TimePickerVariant.LABEL_ASIDE**);
+                                    role.addThemeVariants(**SelectVariant.LABEL_ASIDE**);
+                                    topics.addThemeVariants(**CheckboxGroupVariant.LABEL_ASIDE**);
+                                    level.addThemeVariants(**RadioGroupVariant.LABEL_ASIDE**);
+                                    experience.addThemeVariants(**SliderVariant.LABEL_ASIDE**);
+                                } else {
+                                    name.removeThemeVariants(TextFieldVariant.LABEL_ASIDE);
+                                    ...
+                                }
+                            }
+                        }
                         """);
     }
 
-    void applyAside(boolean on) {
-        if (on) {
-            name.addThemeVariants(TextFieldVariant.LABEL_ASIDE);
-            country.addThemeVariants(ComboBoxVariant.LABEL_ASIDE);
-            start.addThemeVariants(DatePickerVariant.LABEL_ASIDE);
-            time.addThemeVariants(TimePickerVariant.LABEL_ASIDE);
-            role.addThemeVariants(SelectVariant.LABEL_ASIDE);
-            topics.addThemeVariants(CheckboxGroupVariant.LABEL_ASIDE);
-            level.addThemeVariants(RadioGroupVariant.LABEL_ASIDE);
-            experience.addThemeVariants(SliderVariant.LABEL_ASIDE);
-        } else {
-            name.removeThemeVariants(TextFieldVariant.LABEL_ASIDE);
-            country.removeThemeVariants(ComboBoxVariant.LABEL_ASIDE);
-            start.removeThemeVariants(DatePickerVariant.LABEL_ASIDE);
-            time.removeThemeVariants(TimePickerVariant.LABEL_ASIDE);
-            role.removeThemeVariants(SelectVariant.LABEL_ASIDE);
-            topics.removeThemeVariants(CheckboxGroupVariant.LABEL_ASIDE);
-            level.removeThemeVariants(RadioGroupVariant.LABEL_ASIDE);
-            experience.removeThemeVariants(SliderVariant.LABEL_ASIDE);
+    /** A small contact form with its labels aside, aligned to the end. */
+    static class ContactForm extends FormLayout {
+        ContactForm() {
+            setAutoResponsive(true);
+            setLabelsAside(true);
+            setLabelWidth("10rem");
+            setLabelTextAlign(LabelTextAlign.END);
+            addFormItem(new TextField(), "First name");
+            addFormItem(new TextField(), "Last name");
+            addFormItem(new EmailField(), "Email address");
+            setTestId("aside-form");
+        }
+    }
+
+    /** Picks the label text alignment of a Form Layout. */
+    static class AlignmentPicker extends RadioButtonGroup<LabelTextAlign> {
+        AlignmentPicker(FormLayout form) {
+            super("Label text alignment", List.of(LabelTextAlign.START, LabelTextAlign.CENTER, LabelTextAlign.END));
+            setItemLabelGenerator(a -> a.name().charAt(0) + a.name().substring(1).toLowerCase());
+            setValue(form.getLabelTextAlign());
+            addValueChangeListener(e -> form.setLabelTextAlign(e.getValue()));
+            setTestId("label-align");
         }
     }
 
     private void addFormLayoutDemo() {
-        form.setAutoResponsive(true);
-        form.setLabelsAside(true);
-        form.setLabelWidth("10rem");
-        form.addFormItem(new TextField(), "First name");
-        form.addFormItem(new TextField(), "Last name");
-        form.addFormItem(new EmailField(), "Email address");
-        form.setLabelTextAlign(LabelTextAlign.END);
-        form.setTestId("aside-form");
-
-        align.setItems(List.of(LabelTextAlign.START, LabelTextAlign.CENTER, LabelTextAlign.END));
-        align.setItemLabelGenerator(a -> a.name().charAt(0) + a.name().substring(1).toLowerCase());
-        align.setValue(LabelTextAlign.END);
-        align.addValueChangeListener(e -> form.setLabelTextAlign(e.getValue()));
-        align.setTestId("label-align");
-
+        var form = new ContactForm();
         addDemo("Label text alignment in Form Layout",
                 "When a Form Layout shows its labels aside, the labels can now be aligned to the start, center or end. "
                         + "End alignment keeps short labels close to their fields.",
-                new VerticalLayout(align, form), """
-                        form.setAutoResponsive(true);
-                        form.setLabelsAside(true);
-                        form.addFormItem(new TextField(), "First name");
-                        form.setLabelTextAlign(LabelTextAlign.END); // START, CENTER or END
+                new VerticalLayout(new AlignmentPicker(form), form), """
+                        class ContactForm extends FormLayout {
+                            ContactForm() {
+                                setAutoResponsive(true);
+                                setLabelsAside(true);
+                                setLabelWidth("10rem");
+                                **setLabelTextAlign(LabelTextAlign.END)**; // START, CENTER or END
+                                addFormItem(new TextField(), "First name");
+                                addFormItem(new TextField(), "Last name");
+                                addFormItem(new EmailField(), "Email address");
+                            }
+                        }
+
+                        class AlignmentPicker extends RadioButtonGroup<LabelTextAlign> {
+                            AlignmentPicker(FormLayout form) {
+                                super("Label text alignment", List.of(LabelTextAlign.START, LabelTextAlign.CENTER, LabelTextAlign.END));
+                                setValue(form.**getLabelTextAlign()**);
+                                addValueChangeListener(e -> form.**setLabelTextAlign(e.getValue())**);
+                            }
+                        }
                         """);
     }
 }
